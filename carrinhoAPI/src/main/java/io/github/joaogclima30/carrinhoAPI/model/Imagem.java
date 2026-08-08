@@ -30,4 +30,8 @@ public class Imagem {
     @ManyToOne
     @JoinColumn(name = "produto_id")
     private Produto produto;
+
+    public void set() {
+
+    }
 }

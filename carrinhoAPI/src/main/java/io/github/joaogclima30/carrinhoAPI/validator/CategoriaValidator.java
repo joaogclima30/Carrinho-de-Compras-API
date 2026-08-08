@@ -13,7 +13,7 @@ public class CategoriaValidator {
     private final CategoriaRepository categoriaRepository;
 
     public void validarCategoria(Categoria categoria){
-        boolean duplicado = categoriaRepository.existByNome(categoria.getNome());
+        boolean duplicado = categoriaRepository.existsByNome(categoria.getNome());
         if(duplicado){
             throw new CategoiraJaCriada("Categoria já cadastrada");
         }

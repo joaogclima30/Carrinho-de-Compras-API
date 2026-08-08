@@ -12,5 +12,4 @@ public interface ImagemRepository extends JpaRepository<Imagem, Long> {
 
     Optional<Imagem> findById(Long id);
 
-    void delete(Optional<Imagem> imagemEncontrada);
 }
