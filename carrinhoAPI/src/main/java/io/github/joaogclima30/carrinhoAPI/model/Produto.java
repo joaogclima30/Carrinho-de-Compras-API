@@ -3,13 +3,14 @@ package io.github.joaogclima30.carrinhoAPI.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
 @Data
-@AllArgsConstructor
+@NoArgsConstructor
 public class Produto {
 
     @Id
@@ -38,4 +39,8 @@ public class Produto {
 
     @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Imagem> imagens;
+
+
+    public Produto(String nome, String marca, BigDecimal preco, int estoque, String descricao, Categoria categoria) {
+    }
 }

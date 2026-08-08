@@ -1,8 +1,10 @@
-package io.github.joaogclima30.carrinhoAPI.service;
+package io.github.joaogclima30.carrinhoAPI.service.Produto;
 
 import io.github.joaogclima30.carrinhoAPI.exceptions.ProdutoNaoEncontrado;
 import io.github.joaogclima30.carrinhoAPI.exceptions.produtoJaCadastrado;
+import io.github.joaogclima30.carrinhoAPI.model.Categoria;
 import io.github.joaogclima30.carrinhoAPI.model.Produto;
+import io.github.joaogclima30.carrinhoAPI.repository.CategoriaRepository;
 import io.github.joaogclima30.carrinhoAPI.repository.ProdutoRepository;
 import io.github.joaogclima30.carrinhoAPI.validator.ProdutoValidator;
 import lombok.RequiredArgsConstructor;
@@ -16,13 +18,32 @@ import java.util.Optional;
 public class ProdutoService {
 
     private final ProdutoRepository produtoRepository;
-
+    private final CategoriaRepository categoriaRepository;
     private final ProdutoValidator produtoValidator;
 
     public Produto salvarProduto(Produto produto){
         produtoValidator.validarProduto(produto);
+
+        Optional<Categoria> categoria = Optional.ofNullable(categoriaRepository.findByNome(String.valueOf(produto.getCategoria().getNome())))
+                .orElseGet(() -> {
+                    Categoria novaCategoria = new Categoria(produto.getCategoria().getNome());
+                    return Optional.of(categoriaRepository.save(novaCategoria));
+                });
+        produto.setCategoria(categoria);
+
         return produtoRepository.save(produto);
     }
+
+//    public Produto criarProduto(AddProdutoRequest request, Categoria categoria){
+//        return new Produto(
+//                request.getNome(),
+//                request.getMarca(),
+//                request.getPreco(),
+//                request.getEstoque(),
+//                request.getDescricao(),
+//                categoria
+//        );
+//    }
 
     //Verificar melhor forma para fazer verificação de produto não encontrado
     public Optional<Produto> obterProduto(Long id){
