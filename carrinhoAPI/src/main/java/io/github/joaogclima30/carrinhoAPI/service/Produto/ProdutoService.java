@@ -1,7 +1,7 @@
 package io.github.joaogclima30.carrinhoAPI.service.Produto;
 
-import io.github.joaogclima30.carrinhoAPI.exceptions.ProdutoNaoEncontrado;
-import io.github.joaogclima30.carrinhoAPI.exceptions.produtoJaCadastrado;
+import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsProdutos.ProdutoNaoEncontrado;
+import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsProdutos.produtoJaCadastrado;
 import io.github.joaogclima30.carrinhoAPI.model.Categoria;
 import io.github.joaogclima30.carrinhoAPI.model.Produto;
 import io.github.joaogclima30.carrinhoAPI.repository.CategoriaRepository;
@@ -23,27 +23,14 @@ public class ProdutoService {
 
     public Produto salvarProduto(Produto produto){
         produtoValidator.validarProduto(produto);
-
-        Optional<Categoria> categoria = Optional.ofNullable(categoriaRepository.findByNome(String.valueOf(produto.getCategoria().getNome())))
-                .orElseGet(() -> {
-                    Categoria novaCategoria = new Categoria(produto.getCategoria().getNome());
-                    return Optional.of(categoriaRepository.save(novaCategoria));
-                });
-        produto.setCategoria(categoria);
-
+        produto.setCategoria(resolverCategoria(produto.getCategoria()));
         return produtoRepository.save(produto);
     }
 
-//    public Produto criarProduto(AddProdutoRequest request, Categoria categoria){
-//        return new Produto(
-//                request.getNome(),
-//                request.getMarca(),
-//                request.getPreco(),
-//                request.getEstoque(),
-//                request.getDescricao(),
-//                categoria
-//        );
-//    }
+    private Categoria resolverCategoria(Categoria categoriaDoProduto){
+        return categoriaRepository.findByNome(categoriaDoProduto.getNome())
+                .orElseGet(() -> categoriaRepository.save(new Categoria(categoriaDoProduto.getNome())));
+    }
 
     //Verificar melhor forma para fazer verificação de produto não encontrado
     public Optional<Produto> obterProduto(Long id){
@@ -55,6 +42,17 @@ public class ProdutoService {
     }
 
     //Forma diferente feita deletando o objeto diretamente
+    /*@DeleteMapping("{id}")
+    @PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE')")
+    public ResponseEntity<Object> deleteLivro(@Valid @PathVariable("id") String id){
+        var idLivro = UUID.fromString(id);
+        Optional<Livro> livroOptional = livroService.obterPorId(idLivro);
+        livroService.deleteLivro(livroOptional.get());
+        if(livroOptional.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.noContent().build();
+    } */
     public void deletarProduto(Produto produto){
         if(!produtoValidator.existeProdutoCadastrado(produto)){
             throw new produtoJaCadastrado("Não é permitido excluir produto que não existe");
@@ -62,12 +60,19 @@ public class ProdutoService {
         produtoRepository.delete(produto);
     }
 
-    public Produto atualizarProduto(Produto produto){
-        if(produto.getId() == null){
-            throw new IllegalArgumentException("Objeto produto nulo");
-        }
-        produtoValidator.validarProduto(produto);
-        return produtoRepository.save(produto);
+
+    public Produto atualizarProduto(Produto produtoAtualizado){
+        Produto produtoExistente = produtoRepository.findById(produtoAtualizado.getId())
+                .orElseThrow(() -> new ProdutoNaoEncontrado("Produto não existe"));
+
+        produtoExistente.setNome(produtoAtualizado.getNome());
+        produtoExistente.setMarca(produtoAtualizado.getMarca());
+        produtoExistente.setPrice(produtoAtualizado.getPrice());
+        produtoExistente.setEstoque(produtoAtualizado.getEstoque());
+        produtoExistente.setDescricao(produtoAtualizado.getDescricao());
+        produtoExistente.setCategoria(resolverCategoria(produtoAtualizado.getCategoria()));
+
+        return produtoRepository.save(produtoExistente);
     }
 
     public List<Produto> listarTodosProdutos(){

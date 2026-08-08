@@ -15,7 +15,7 @@ public class Categoria {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     private String nome;
 
@@ -23,5 +23,6 @@ public class Categoria {
     private List<Produto> produtos;
 
     public Categoria(String nome) {
+        this.nome = nome;
     }
 }

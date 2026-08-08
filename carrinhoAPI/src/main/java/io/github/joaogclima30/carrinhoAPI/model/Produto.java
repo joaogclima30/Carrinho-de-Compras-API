@@ -1,7 +1,6 @@
 package io.github.joaogclima30.carrinhoAPI.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
