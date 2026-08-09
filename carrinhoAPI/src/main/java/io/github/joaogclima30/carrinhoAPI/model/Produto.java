@@ -41,5 +41,11 @@ public class Produto {
 
 
     public Produto(String nome, String marca, BigDecimal preco, int estoque, String descricao, Categoria categoria) {
+        this.nome = nome;
+        this.marca = marca;
+        this.price = preco;
+        this.estoque = estoque;
+        this.descricao = descricao;
+        this.categoria = categoria;
     }
 }

@@ -42,7 +42,7 @@ public class ImagemController {
     }
 
     @PutMapping("/imagem/{imagemId}/atualizar")
-    public ResponseEntity<ApiResponse> atualizarImagem(@Valid @PathVariable Long imagemId, @RequestBody MultipartFile file){
+    public ResponseEntity<ApiResponse> atualizarImagem(@Valid @PathVariable Long imagemId, @RequestParam MultipartFile file){
         Imagem imagem = imagemService.buscarImagem(imagemId);
 
         if(imagem != null) {
@@ -61,6 +61,6 @@ public class ImagemController {
             return ResponseEntity.ok(new ApiResponse("Deletado com sucesso!", null));
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponse("Não é possivel Deletar", HttpStatus.INTERNAL_SERVER_ERROR));
+                .body(new ApiResponse("Não é possivel Delw", HttpStatus.INTERNAL_SERVER_ERROR));
     }
 }

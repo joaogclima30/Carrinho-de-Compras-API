@@ -13,5 +13,4 @@ public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
 
     boolean existsByNome(String nome);
 
-    void delete(Optional<Categoria> categoriaEncontrada);
 }

@@ -31,11 +31,7 @@ public class CategoriaService {
     }
 
     public void deletarCategoriaPorId(Long id){
-        Optional<Categoria> categoriaEncontrada = categoriaRepository.findById(id);
-        if (categoriaEncontrada == null){
-            throw new CategoriaNaoEncontrada("Não existe essa categoria");
-        }
-        categoriaRepository.delete(categoriaEncontrada);
+        categoriaRepository.delete(categoriaPorId(id));
     }
 
     public Categoria categoriaPorId(Long id){

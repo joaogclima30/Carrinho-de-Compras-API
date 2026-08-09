@@ -1,5 +1,6 @@
 package io.github.joaogclima30.carrinhoAPI.service.Produto;
 
+import io.github.joaogclima30.carrinhoAPI.dto.ProdutoDTO.ProdutoRequestDTO;
 import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsProdutos.ProdutoNaoEncontrado;
 import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsProdutos.produtoJaCadastrado;
 import io.github.joaogclima30.carrinhoAPI.model.Categoria;
@@ -21,10 +22,10 @@ public class ProdutoService {
     private final CategoriaRepository categoriaRepository;
     private final ProdutoValidator produtoValidator;
 
-    public Produto salvarProduto(Produto produto){
-        produtoValidator.validarProduto(produto);
-        produto.setCategoria(resolverCategoria(produto.getCategoria()));
-        return produtoRepository.save(produto);
+    public Produto salvarProduto(ProdutoRequestDTO produtoRequestDTO){
+        produtoValidator.validarProduto(produtoRequestDTO);
+        produtoRequestDTO.setCategoria(resolverCategoria(produtoRequestDTO.getCategoria()));
+        return produtoRepository.save(produtoRequestDTO);
     }
 
     private Categoria resolverCategoria(Categoria categoriaDoProduto){

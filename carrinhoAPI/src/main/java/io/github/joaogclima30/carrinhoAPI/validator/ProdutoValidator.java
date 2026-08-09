@@ -1,5 +1,6 @@
 package io.github.joaogclima30.carrinhoAPI.validator;
 
+import io.github.joaogclima30.carrinhoAPI.dto.ProdutoDTO.ProdutoRequestDTO;
 import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsProdutos.produtoJaCadastrado;
 import io.github.joaogclima30.carrinhoAPI.model.Produto;
 import io.github.joaogclima30.carrinhoAPI.repository.ProdutoRepository;
@@ -12,8 +13,8 @@ public class ProdutoValidator {
 
     private final ProdutoRepository produtoRepository;
 
-    public void validarProduto(Produto produto){
-        boolean duplicado = produtoRepository.existsByNomeAndMarca(produto.getNome(), produto.getMarca());
+    public void validarProduto(ProdutoRequestDTO produtoRequestDTO){
+        boolean duplicado = produtoRepository.existsByNomeAndMarca(produtoRequestDTO.getNome(), produtoRequestDTO.getMarca());
         if(duplicado){
             throw new produtoJaCadastrado("Produto já foi cadastrado");
         }
