@@ -24,8 +24,17 @@ public class ProdutoService {
 
     public Produto salvarProduto(ProdutoRequestDTO produtoRequestDTO){
         produtoValidator.validarProduto(produtoRequestDTO);
-        produtoRequestDTO.setCategoria(resolverCategoria(produtoRequestDTO.getCategoria()));
-        return produtoRepository.save(produtoRequestDTO);
+
+        Produto produto = new Produto(
+                produtoRequestDTO.getNome(),
+                produtoRequestDTO.getMarca(),
+                produtoRequestDTO.getPreco(),
+                produtoRequestDTO.getEstoque(),
+                produtoRequestDTO.getDescricao(),
+                produtoRequestDTO.getCategoria()
+        );
+        produto.setCategoria(resolverCategoria(produto.getCategoria()));
+        return produtoRepository.save(produto);
     }
 
     private Categoria resolverCategoria(Categoria categoriaDoProduto){
@@ -42,33 +51,18 @@ public class ProdutoService {
         return produtoRepository.findById(id);
     }
 
-    //Forma diferente feita deletando o objeto diretamente
-    /*@DeleteMapping("{id}")
-    @PreAuthorize("hasAnyRole('OPERADOR', 'GERENTE')")
-    public ResponseEntity<Object> deleteLivro(@Valid @PathVariable("id") String id){
-        var idLivro = UUID.fromString(id);
-        Optional<Livro> livroOptional = livroService.obterPorId(idLivro);
-        livroService.deleteLivro(livroOptional.get());
-        if(livroOptional.isEmpty()){
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.noContent().build();
-    } */
-    public void deletarProduto(Produto produto){
-        if(!produtoValidator.existeProdutoCadastrado(produto)){
-            throw new produtoJaCadastrado("Não é permitido excluir produto que não existe");
-        }
-        produtoRepository.delete(produto);
+    public void deletarProduto(Long id){
+        produtoRepository.deleteById(id);
     }
 
 
-    public Produto atualizarProduto(Produto produtoAtualizado){
-        Produto produtoExistente = produtoRepository.findById(produtoAtualizado.getId())
+    public Produto atualizarProduto(ProdutoRequestDTO produtoAtualizado, Long id){
+        Produto produtoExistente = produtoRepository.findById(id)
                 .orElseThrow(() -> new ProdutoNaoEncontrado("Produto não existe"));
 
         produtoExistente.setNome(produtoAtualizado.getNome());
         produtoExistente.setMarca(produtoAtualizado.getMarca());
-        produtoExistente.setPrice(produtoAtualizado.getPrice());
+        produtoExistente.setPrice(produtoAtualizado.getPreco());
         produtoExistente.setEstoque(produtoAtualizado.getEstoque());
         produtoExistente.setDescricao(produtoAtualizado.getDescricao());
         produtoExistente.setCategoria(resolverCategoria(produtoAtualizado.getCategoria()));

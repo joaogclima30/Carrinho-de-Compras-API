@@ -21,18 +21,60 @@ public class ProdutoController {
     @PostMapping("/salvar")
     public ResponseEntity<ApiResponse> salvarProduto(@RequestBody ProdutoRequestDTO produtoRequestDTO){
         Produto produtoSalvo = produtoService.salvarProduto(produtoRequestDTO);
-
+        return ResponseEntity.ok(new ApiResponse("Produto salvo com sucesso!", produtoSalvo));
     }
+
+    @PutMapping("/{produtoId}/atualizar")
+    public ResponseEntity<ApiResponse> atualizarProduto(@RequestBody ProdutoRequestDTO requestDTO, @PathVariable Long produtoId){
+        Produto produto = produtoService.atualizarProduto(requestDTO, produtoId);
+        return ResponseEntity.ok(new ApiResponse("Atualizado com Sucesso!", produto));
+    }
+
+    @DeleteMapping("/{produtoId}/deletar")
+    public ResponseEntity<ApiResponse> deletarProduto(@PathVariable Long produtoId){
+        produtoService.deletarProduto(produtoId);
+        return ResponseEntity.ok(new ApiResponse("Deletado com sucesso", null));
+    }
+
     @GetMapping("/all")
     public ResponseEntity<ApiResponse> listarTodosProdutos(){
         List<Produto> produto = produtoService.listarTodosProdutos();
-        return ResponseEntity.ok(new ApiResponse("Sucesso", produto));
+        return ResponseEntity.ok(new ApiResponse("Sucesso!", produto));
     }
 
-    @GetMapping("/produto/{produtoId}/produto")
+    @GetMapping("/{produtoId}/listarPorId")
     public ResponseEntity<ApiResponse> listarProdutoPorId(@PathVariable Long produtoId){
         Optional<Produto> produto = produtoService.obterPorId(produtoId);
-        return ResponseEntity.ok(new ApiResponse("Sucesso", produto));
+        return ResponseEntity.ok(new ApiResponse("Sucesso!", produto));
     }
 
+    @GetMapping("/by/marca-and-nome")
+    public ResponseEntity<ApiResponse> listarProdutosByMarcaAndNome(@RequestParam String marca, @RequestParam String nomeProduto){
+        List<Produto> produtos = produtoService.listarProdutoPorMarcaAndNome(marca,nomeProduto);
+        return ResponseEntity.ok(new ApiResponse("Sucesso", produtos));
+    }
+
+    @GetMapping("/by/categoria-and-marca")
+    public ResponseEntity<ApiResponse> listarProdutosByCategoriaAndMarca(@RequestParam String categoria,@RequestParam String marca){
+        List<Produto> produtos = produtoService.listarProdutoPorCategoriaAndMarca(categoria, marca);
+        return ResponseEntity.ok(new ApiResponse("Sucesso", produtos));
+    }
+
+    @GetMapping("/{nome}/produtos")
+    public ResponseEntity<ApiResponse> listarProdutosByNome(@PathVariable String nome){
+        List<Produto> produtos = produtoService.listarProdutoPorNome(nome);
+        return ResponseEntity.ok(new ApiResponse("Sucesso", produtos));
+    }
+
+    @GetMapping("/produto/by-marca")
+    public ResponseEntity<ApiResponse> listarProdutoByMarca(@RequestParam String marca){
+        List<Produto> produtos = produtoService.listarProdutosPorMarca(marca);
+        return ResponseEntity.ok(new ApiResponse("Sucesso", produtos));
+    }
+
+    @GetMapping("/produto/{categoria}/all/produtos")
+    public ResponseEntity<ApiResponse> listarProdutoByCategoria(@PathVariable String categoria){
+        List<Produto> produtos = produtoService.listarProdutosPorCategoria(categoria);
+        return ResponseEntity.ok(new ApiResponse("Sucesso", produtos));
+    }
 }

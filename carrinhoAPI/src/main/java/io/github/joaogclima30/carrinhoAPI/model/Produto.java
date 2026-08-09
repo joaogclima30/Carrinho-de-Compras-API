@@ -48,4 +48,5 @@ public class Produto {
         this.descricao = descricao;
         this.categoria = categoria;
     }
+
 }
