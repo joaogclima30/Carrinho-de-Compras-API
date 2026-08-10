@@ -1,8 +1,8 @@
 # 🛒 Carrinho de Compras API
 
-API REST de um sistema de **carrinho de compras**, desenvolvida com Java e Spring Boot.
+API REST de um sistema de **carrinho de compras**, em desenvolimento com Java e Spring Boot.
 
-O projeto foi desenvolvido com foco no aprendizado de construção de APIs backend, trabalhando desde a modelagem das entidades e operações CRUD até gerenciamento de carrinho, pedidos e autenticação utilizando **Spring Security e JWT**.
+O projeto está em desenvolvimento com foco no aprendizado de construção de APIs backend, trabalhando desde a modelagem das entidades e operações CRUD até gerenciamento de carrinho, pedidos e autenticação utilizando **Spring Security e JWT**.
 
 ---
 
@@ -250,5 +250,3 @@ Desenvolvedor Backend Java
 * LinkedIn: https://www.linkedin.com/in/joaolima3008
 
 ---
-
-O conteúdo da aula aborda a construção progressiva do backend, passando por entidades, CRUD, produtos, categorias, imagens, carrinho, pedidos, usuários, DTOs, Spring Security e JWT.
