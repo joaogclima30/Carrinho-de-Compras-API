@@ -32,9 +32,9 @@ public class ImagemController {
     }
 
     @GetMapping("/imagem/dowload/{imagemId}")
-    public ResponseEntity<Resource> abaixarImagem(@PathVariable Long imagemId){
+    public ResponseEntity<Resource> abaixarImagem(@PathVariable Long imagemId) throws SQLException {
         Imagem imagem = imagemService.buscarImagem(imagemId);
-        ByteArrayResource resource = new ByteArrayResource(imagem.getImagem());
+        ByteArrayResource resource = new ByteArrayResource(imagem.getImagem().getBytes(1,(int) imagem.getImagem().length()));
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(imagem.getTipoArquivo()))

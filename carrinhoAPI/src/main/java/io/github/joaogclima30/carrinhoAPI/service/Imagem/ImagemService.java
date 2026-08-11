@@ -7,6 +7,7 @@ import io.github.joaogclima30.carrinhoAPI.model.Imagem;
 import io.github.joaogclima30.carrinhoAPI.model.Produto;
 import io.github.joaogclima30.carrinhoAPI.repository.ImagemRepository;
 import io.github.joaogclima30.carrinhoAPI.service.Produto.ProdutoService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,14 +20,14 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ImagemService {
 
     private final ImagemRepository imagemRepository;
     private final ProdutoService produtoService;
 
     public List<ImagemDTO> salvarImagem(List<MultipartFile> files, Long produtoId){
-        Produto produto = produtoService.obterPorId(produtoId)
-                .orElseThrow(() -> new ProdutoNaoEncontrado("Produto não existe"));
+        Produto produto = produtoService.obterPorId(produtoId);
 
         List<ImagemDTO> imagemSalvaDto = new ArrayList<>();
         for (MultipartFile file : files){
@@ -34,7 +35,7 @@ public class ImagemService {
                 Imagem imagem = new Imagem();
                 imagem.setNomeArquivo(file.getOriginalFilename());
                 imagem.setTipoArquivo(file.getContentType());
-                imagem.setImagem(file.getBytes());
+                imagem.setImagem(new SerialBlob(file.getBytes()));
                 imagem.setProduto(produto);
 
                 String buildDownloadUrl = "/api/v1/imagens/imagem/dowload";
@@ -46,11 +47,11 @@ public class ImagemService {
                 imagemRepository.save(imagemSalva);
 
                 ImagemDTO imagemDTO = new ImagemDTO();
-                imagemDTO.setImagemId(imagemSalva.getId());
-                imagemDTO.setImagemName(imagemSalva.getNomeArquivo());
+                imagemDTO.setId(imagemSalva.getId());
+                imagemDTO.setArquivoNome(imagemSalva.getNomeArquivo());
                 imagemDTO.setDownloadUrl(imagemSalva.getDownloadUrl());
                 imagemSalvaDto.add(imagemDTO);
-            } catch (IOException e) {
+            } catch (IOException | SQLException e) {
                 throw new RuntimeException(e.getMessage());
             }
         }
@@ -60,11 +61,11 @@ public class ImagemService {
     public void atualizarImagem(MultipartFile file, Long imagemId){
         Imagem imagem = buscarImagem(imagemId);
         try {
-            imagem.setTipoArquivo(file.getOriginalFilename());
+            imagem.setTipoArquivo(file.getContentType());
             imagem.setNomeArquivo(file.getOriginalFilename());
-            imagem.setImagem(file.getBytes());
+            imagem.setImagem(new SerialBlob(file.getBytes()));
             imagemRepository.save(imagem);
-        } catch (IOException e) {
+        } catch (IOException | SQLException e) {
             throw new RuntimeException(e.getMessage());
         }
 

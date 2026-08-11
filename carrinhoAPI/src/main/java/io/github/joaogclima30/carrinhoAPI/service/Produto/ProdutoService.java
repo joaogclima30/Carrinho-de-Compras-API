@@ -53,7 +53,8 @@ public class ProdutoService {
     }
 
     public Produto obterPorId(Long id){
-        return produtoRepository.findById(id);
+        return produtoRepository.findById(id)
+                .orElseThrow(() -> new ProdutoNaoEncontrado("Produto não existe"));
     }
 
     public void deletarProduto(Long id){
