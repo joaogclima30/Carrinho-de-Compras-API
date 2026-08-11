@@ -32,12 +32,13 @@ public class ImagemController {
     }
 
     @GetMapping("/imagem/dowload/{imagemId}")
-    public ResponseEntity<Resource> abaixarImagem(@Valid @PathVariable Long imagemId) throws SQLException {
+    public ResponseEntity<Resource> abaixarImagem(@PathVariable Long imagemId){
         Imagem imagem = imagemService.buscarImagem(imagemId);
-        ByteArrayResource resource = new ByteArrayResource(imagem.getImagem().getBytes(1,(int) imagem.getImagem().length()));
+        ByteArrayResource resource = new ByteArrayResource(imagem.getImagem());
 
-        return ResponseEntity.ok().contentType(MediaType.parseMediaType(imagem.getTipoArquivo()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "anexo; nomeArquivo=\"" + imagem.getNomeArquivo() + "\"")
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(imagem.getTipoArquivo()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + imagem.getNomeArquivo() + "\"")
                 .body(resource);
     }
 

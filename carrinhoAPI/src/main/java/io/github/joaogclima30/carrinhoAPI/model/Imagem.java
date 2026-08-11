@@ -23,7 +23,7 @@ public class Imagem {
 
     @Lob
     //Tipo blob serve para armazenar imagens, documentos
-    private Blob imagem;
+    private byte[] imagem;
 
     private String downloadUrl;
 

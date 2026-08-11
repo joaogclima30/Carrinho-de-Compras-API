@@ -39,7 +39,6 @@ public class Produto {
     @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Imagem> imagens;
 
-
     public Produto(String nome, String marca, BigDecimal preco, int estoque, String descricao, Categoria categoria) {
         this.nome = nome;
         this.marca = marca;
@@ -48,5 +47,4 @@ public class Produto {
         this.descricao = descricao;
         this.categoria = categoria;
     }
-
 }

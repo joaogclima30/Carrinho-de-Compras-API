@@ -38,20 +38,23 @@ public class ProdutoController {
 
     @GetMapping("/all")
     public ResponseEntity<ApiResponse> listarTodosProdutos(){
-        List<Produto> produto = produtoService.listarTodosProdutos();
-        return ResponseEntity.ok(new ApiResponse("Sucesso!", produto));
+        List<Produto> produtos = produtoService.listarTodosProdutos();
+        List<ProdutoRequestDTO> produtosConvertidos = produtoService.listarProdutosConvertidos(produtos);
+        return ResponseEntity.ok(new ApiResponse("Sucesso!", produtosConvertidos));
     }
 
     @GetMapping("/{produtoId}/listarPorId")
     public ResponseEntity<ApiResponse> listarProdutoPorId(@PathVariable Long produtoId){
-        Optional<Produto> produto = produtoService.obterPorId(produtoId);
-        return ResponseEntity.ok(new ApiResponse("Sucesso!", produto));
+        Produto produto = produtoService.obterPorId(produtoId);
+        var produtoDto = produtoService.converterParaDto(produto);
+        return ResponseEntity.ok(new ApiResponse("Sucesso!", produtoDto));
     }
 
     @GetMapping("/by/marca-and-nome")
     public ResponseEntity<ApiResponse> listarProdutosByMarcaAndNome(@RequestParam String marca, @RequestParam String nomeProduto){
         List<Produto> produtos = produtoService.listarProdutoPorMarcaAndNome(marca,nomeProduto);
-        return ResponseEntity.ok(new ApiResponse("Sucesso", produtos));
+        List<ProdutoRequestDTO> produtosConvertidos = produtoService.listarProdutosConvertidos(produtos);
+        return ResponseEntity.ok(new ApiResponse("Sucesso", produtosConvertidos));
     }
 
     @GetMapping("/by/categoria-and-marca")
@@ -76,5 +79,11 @@ public class ProdutoController {
     public ResponseEntity<ApiResponse> listarProdutoByCategoria(@PathVariable String categoria){
         List<Produto> produtos = produtoService.listarProdutosPorCategoria(categoria);
         return ResponseEntity.ok(new ApiResponse("Sucesso", produtos));
+    }
+
+    @GetMapping("/produto/contador/by-brand/and-name")
+    public ResponseEntity<ApiResponse> contadorProdutosByMarcaAndNome(@RequestParam String marca, @RequestParam String nome){
+        var contadorProduto = produtoService.contadorProdutosPorMarcaAndNome(marca, nome);
+        return ResponseEntity.ok(new ApiResponse("Produto contado", contadorProduto));
     }
 }

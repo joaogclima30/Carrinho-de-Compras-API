@@ -1,14 +1,17 @@
 package io.github.joaogclima30.carrinhoAPI.service.Produto;
 
+import io.github.joaogclima30.carrinhoAPI.dto.ImagemDTO.ImagemDTO;
 import io.github.joaogclima30.carrinhoAPI.dto.ProdutoDTO.ProdutoRequestDTO;
 import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsProdutos.ProdutoNaoEncontrado;
-import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsProdutos.produtoJaCadastrado;
 import io.github.joaogclima30.carrinhoAPI.model.Categoria;
+import io.github.joaogclima30.carrinhoAPI.model.Imagem;
 import io.github.joaogclima30.carrinhoAPI.model.Produto;
 import io.github.joaogclima30.carrinhoAPI.repository.CategoriaRepository;
+import io.github.joaogclima30.carrinhoAPI.repository.ImagemRepository;
 import io.github.joaogclima30.carrinhoAPI.repository.ProdutoRepository;
 import io.github.joaogclima30.carrinhoAPI.validator.ProdutoValidator;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +24,8 @@ public class ProdutoService {
     private final ProdutoRepository produtoRepository;
     private final CategoriaRepository categoriaRepository;
     private final ProdutoValidator produtoValidator;
+    private final ModelMapper modelMapper;
+    private final ImagemRepository imagemRepository;
 
     public Produto salvarProduto(ProdutoRequestDTO produtoRequestDTO){
         produtoValidator.validarProduto(produtoRequestDTO);
@@ -47,7 +52,7 @@ public class ProdutoService {
         return Optional.of(produtoRepository.findById(id).orElseThrow(()->new ProdutoNaoEncontrado("Produto não existe")));
     }
 
-    public Optional<Produto> obterPorId(Long id){
+    public Produto obterPorId(Long id){
         return produtoRepository.findById(id);
     }
 
@@ -97,4 +102,16 @@ public class ProdutoService {
      public Long contadorProdutosPorMarcaAndNome(String marca, String nome){
         return produtoRepository.countByMarcaAndNome(marca,nome);
      }
+
+     public List<ProdutoRequestDTO> listarProdutosConvertidos(List<Produto> produtos){
+        return produtos.stream().map(this::converterParaDto).toList();
+     }
+
+     public ProdutoRequestDTO converterParaDto(Produto produto){
+        ProdutoRequestDTO produtoRequestDTO = modelMapper.map(produto,ProdutoRequestDTO.class);
+        List<Imagem> imagems = imagemRepository.findByProdutoId(produto.getId());
+        List<ImagemDTO> imagemDTOS = imagems.stream().map(imagem -> modelMapper.map(imagem, ImagemDTO.class)).toList();
+        produtoRequestDTO.setImagensDto(imagemDTOS);
+        return produtoRequestDTO;
+    }
 }

@@ -34,7 +34,7 @@ public class ImagemService {
                 Imagem imagem = new Imagem();
                 imagem.setNomeArquivo(file.getOriginalFilename());
                 imagem.setTipoArquivo(file.getContentType());
-                imagem.setImagem(new SerialBlob(file.getBytes()));
+                imagem.setImagem(file.getBytes());
                 imagem.setProduto(produto);
 
                 String buildDownloadUrl = "/api/v1/imagens/imagem/dowload";
@@ -50,7 +50,7 @@ public class ImagemService {
                 imagemDTO.setImagemName(imagemSalva.getNomeArquivo());
                 imagemDTO.setDownloadUrl(imagemSalva.getDownloadUrl());
                 imagemSalvaDto.add(imagemDTO);
-            } catch (IOException | SQLException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e.getMessage());
             }
         }
@@ -62,9 +62,9 @@ public class ImagemService {
         try {
             imagem.setTipoArquivo(file.getOriginalFilename());
             imagem.setNomeArquivo(file.getOriginalFilename());
-            imagem.setImagem(new SerialBlob(file.getBytes()));
+            imagem.setImagem(file.getBytes());
             imagemRepository.save(imagem);
-        } catch (IOException | SQLException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e.getMessage());
         }
 
