@@ -1,6 +1,7 @@
 package io.github.joaogclima30.carrinhoAPI.controller;
 
 import io.github.joaogclima30.carrinhoAPI.dto.ProdutoDTO.ProdutoRequestDTO;
+import io.github.joaogclima30.carrinhoAPI.model.Categoria;
 import io.github.joaogclima30.carrinhoAPI.model.Produto;
 import io.github.joaogclima30.carrinhoAPI.response.ApiResponse;
 import io.github.joaogclima30.carrinhoAPI.service.Produto.ProdutoService;
@@ -50,7 +51,7 @@ public class ProdutoController {
         return ResponseEntity.ok(new ApiResponse("Sucesso!", produtoDto));
     }
 
-    @GetMapping("/by/marca-and-nome")
+    @GetMapping("/by/marca-and-nomeProduto")
     public ResponseEntity<ApiResponse> listarProdutosByMarcaAndNome(@RequestParam String marca, @RequestParam String nomeProduto){
         List<Produto> produtos = produtoService.listarProdutoPorMarcaAndNome(marca,nomeProduto);
         List<ProdutoRequestDTO> produtosConvertidos = produtoService.listarProdutosConvertidos(produtos);
@@ -58,7 +59,7 @@ public class ProdutoController {
     }
 
     @GetMapping("/by/categoria-and-marca")
-    public ResponseEntity<ApiResponse> listarProdutosByCategoriaAndMarca(@RequestParam String categoria,@RequestParam String marca){
+    public ResponseEntity<ApiResponse> listarProdutosByCategoriaAndMarca(@RequestParam Categoria categoria, @RequestParam String marca){
         List<Produto> produtos = produtoService.listarProdutoPorCategoriaAndMarca(categoria, marca);
         return ResponseEntity.ok(new ApiResponse("Sucesso", produtos));
     }

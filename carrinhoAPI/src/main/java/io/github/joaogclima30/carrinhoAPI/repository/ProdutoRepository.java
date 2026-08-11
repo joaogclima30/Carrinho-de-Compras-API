@@ -1,5 +1,6 @@
 package io.github.joaogclima30.carrinhoAPI.repository;
 
+import io.github.joaogclima30.carrinhoAPI.model.Categoria;
 import io.github.joaogclima30.carrinhoAPI.model.Produto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -16,7 +17,7 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
     List<Produto> findByMarca(String marca);
 
-    List<Produto> findByCategoriaAndMarca(String categoria, String marca);
+    List<Produto> findByCategoriaAndMarca(Categoria categoria, String marca);
 
     List<Produto> findByNome(String nome);
 
