@@ -88,7 +88,7 @@ public class ProdutoService {
         return produtoRepository.findByMarca(marca);
     }
 
-    public List<Produto> listarProdutoPorCategoriaAndMarca(Categoria categoria,String marca){
+    public List<Produto> listarProdutoPorCategoriaAndMarca(String categoria,String marca){
         return produtoRepository.findByCategoriaAndMarca(categoria,marca);
     }
 

@@ -59,7 +59,7 @@ public class ProdutoController {
     }
 
     @GetMapping("/by/categoria-and-marca")
-    public ResponseEntity<ApiResponse> listarProdutosByCategoriaAndMarca(@RequestParam Categoria categoria, @RequestParam String marca){
+    public ResponseEntity<ApiResponse> listarProdutosByCategoriaAndMarca(@RequestParam String categoria, @RequestParam String marca){
         List<Produto> produtos = produtoService.listarProdutoPorCategoriaAndMarca(categoria, marca);
         return ResponseEntity.ok(new ApiResponse("Sucesso", produtos));
     }
