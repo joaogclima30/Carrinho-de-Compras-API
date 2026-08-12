@@ -29,7 +29,7 @@ public class CategoriaController {
         return ResponseEntity.ok(new ApiResponse("Salvo com Sucesso!", categoriaEncontrada));
     }
 
-    @PostMapping("/categoria/{id}/atualizar")
+    @PutMapping("/categoria/{id}/atualizar")
     public ResponseEntity<ApiResponse> atualizarCategoria(@PathVariable Long id, @RequestBody Categoria categoria){
         Categoria categoriaEncontrada = categoriaService.atualizarCategoria(categoria, id);
         return ResponseEntity.ok(new ApiResponse("Atualizado com Sucesso!", categoriaEncontrada));

@@ -82,7 +82,7 @@ public class ProdutoController {
         return ResponseEntity.ok(new ApiResponse("Sucesso", produtos));
     }
 
-    @GetMapping("/produto/contador/by-brand/and-name")
+    @GetMapping("/produto/contador/by-brand/and-nome")
     public ResponseEntity<ApiResponse> contadorProdutosByMarcaAndNome(@RequestParam String marca, @RequestParam String nome){
         var contadorProduto = produtoService.contadorProdutosPorMarcaAndNome(marca, nome);
         return ResponseEntity.ok(new ApiResponse("Produto contado", contadorProduto));
