@@ -1,8 +1,10 @@
 package io.github.joaogclima30.carrinhoAPI.controller;
 
+import io.github.joaogclima30.carrinhoAPI.dto.CategoriaDTO.CategoriaRequestDTO;
 import io.github.joaogclima30.carrinhoAPI.model.Categoria;
 import io.github.joaogclima30.carrinhoAPI.response.ApiResponse;
 import io.github.joaogclima30.carrinhoAPI.service.Categoria.CategoriaService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,13 +26,13 @@ public class CategoriaController {
     }
 
     @PostMapping("/salvar")
-    public ResponseEntity<ApiResponse> salvarCategorias(@RequestBody Categoria nome){
-        Categoria categoriaEncontrada = categoriaService.salvarCategoria(nome);
-        return ResponseEntity.ok(new ApiResponse("Salvo com Sucesso!", categoriaEncontrada));
+    public ResponseEntity<ApiResponse> salvarCategorias(@Valid @RequestBody CategoriaRequestDTO dto){
+        Categoria categoriaSalva = categoriaService.salvarCategoria(new Categoria(dto.getNome()));
+        return ResponseEntity.ok(new ApiResponse("Salvo com Sucesso!", categoriaSalva));
     }
 
     @PutMapping("/categoria/{id}/atualizar")
-    public ResponseEntity<ApiResponse> atualizarCategoria(@PathVariable Long id, @RequestBody Categoria categoria){
+    public ResponseEntity<ApiResponse> atualizarCategoria(@PathVariable Long id, @RequestBody CategoriaRequestDTO categoria){
         Categoria categoriaEncontrada = categoriaService.atualizarCategoria(categoria, id);
         return ResponseEntity.ok(new ApiResponse("Atualizado com Sucesso!", categoriaEncontrada));
     }
@@ -41,14 +43,14 @@ public class CategoriaController {
         return ResponseEntity.ok(new ApiResponse("Deletado!", null));
     }
 
-    @GetMapping("/categoria/{id}/categoria")
+    @GetMapping("/categoria/{id}")
     public ResponseEntity<ApiResponse> listarCategoriaPorId(@PathVariable Long id){
         Categoria categoriaEncontrada = categoriaService.categoriaPorId(id);
         return ResponseEntity.ok(new ApiResponse("Encontrado!", categoriaEncontrada));
 
     }
 
-    @GetMapping("/categoria/{nome}/categoria")
+    @GetMapping("/categoria/{nome}/procurar")
     public ResponseEntity<ApiResponse> listarCategoriaPorNome(@PathVariable String nome){
         Optional<Categoria> categoriaEncontrada = categoriaService.categoriaPorNome(nome);
         return ResponseEntity.ok(new ApiResponse("Encontrado!", categoriaEncontrada));

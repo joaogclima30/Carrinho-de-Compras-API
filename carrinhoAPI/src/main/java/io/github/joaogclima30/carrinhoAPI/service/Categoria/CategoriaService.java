@@ -1,5 +1,6 @@
 package io.github.joaogclima30.carrinhoAPI.service.Categoria;
 
+import io.github.joaogclima30.carrinhoAPI.dto.CategoriaDTO.CategoriaRequestDTO;
 import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsCategoria.CategoriaNaoEncontrada;
 import io.github.joaogclima30.carrinhoAPI.model.Categoria;
 import io.github.joaogclima30.carrinhoAPI.repository.CategoriaRepository;
@@ -19,15 +20,14 @@ public class CategoriaService {
 
 
     public Categoria salvarCategoria(Categoria categoria){
-        categoriaValidator.validarCategoria(categoria);//Verifica a duplicidade da Categoria
+        categoriaValidator.validarCategoria(categoria);
         return categoriaRepository.save(categoria);
     }
 
-    public Categoria atualizarCategoria(Categoria categoria, Long id){
-        return Optional.ofNullable(categoriaPorId(id)).map(oldCategory -> {
-            oldCategory.setNome(categoria.getNome());
-            return categoriaRepository.save(oldCategory);
-        }) .orElseThrow(() -> new CategoriaNaoEncontrada("Categoria não encontrada!"));
+    public Categoria atualizarCategoria(CategoriaRequestDTO dto, Long id){
+        Categoria categoria = categoriaPorId(id);
+        categoria.setNome(dto.getNome());
+        return categoriaRepository.save(categoria);
     }
 
     public void deletarCategoriaPorId(Long id){

@@ -31,14 +31,14 @@ public class ImagemController {
         return ResponseEntity.ok(new ApiResponse("Salvo com Sucesso!", imagemDtos));
     }
 
+    //Verificar
     @GetMapping("/imagem/dowload/{imagemId}")
     public ResponseEntity<Resource> abaixarImagem(@PathVariable Long imagemId) throws SQLException {
-        Imagem imagem = imagemService.buscarImagem(imagemId);
-        ByteArrayResource resource = new ByteArrayResource(imagem.getImagem().getBytes(1,(int) imagem.getImagem().length()));
-
+        var download = imagemService.buscarImagemParaDownload(imagemId);
+        ByteArrayResource resource = new ByteArrayResource(download.bytes());
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(imagem.getTipoArquivo()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + imagem.getNomeArquivo() + "\"")
+                .contentType(MediaType.parseMediaType(download.tipoArquivo()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + download.nomeArquivo() + "\"")
                 .body(resource);
     }
 

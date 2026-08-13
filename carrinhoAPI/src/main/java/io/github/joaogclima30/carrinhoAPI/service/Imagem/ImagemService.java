@@ -1,6 +1,7 @@
 package io.github.joaogclima30.carrinhoAPI.service.Imagem;
 
 import io.github.joaogclima30.carrinhoAPI.dto.ImagemDTO.ImagemDTO;
+import io.github.joaogclima30.carrinhoAPI.dto.ImagemDTO.ImagemDownload;
 import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsImagem.ImagemNãoExiste;
 import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsProdutos.ProdutoNaoEncontrado;
 import io.github.joaogclima30.carrinhoAPI.model.Imagem;
@@ -73,6 +74,12 @@ public class ImagemService {
 
     public Imagem buscarImagem(Long id){
         return imagemRepository.findById(id).orElseThrow(() -> new ImagemNãoExiste("Não há imagem encontrada com id: " + id));
+    }
+
+    public ImagemDownload buscarImagemParaDownload(Long id) throws SQLException {
+        Imagem imagem = buscarImagem(id);
+        byte[] bytes = imagem.getImagem().getBytes(1, (int) imagem.getImagem().length());
+        return new ImagemDownload(bytes, imagem.getTipoArquivo(), imagem.getNomeArquivo());
     }
 
 //    public void deletarImagemPorId(Long id){
