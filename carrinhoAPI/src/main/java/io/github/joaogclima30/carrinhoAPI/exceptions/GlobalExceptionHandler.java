@@ -1,6 +1,7 @@
 package io.github.joaogclima30.carrinhoAPI.exceptions;
 
 import io.github.joaogclima30.carrinhoAPI.dto.ErroResponse.ErroResponse;
+import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsCarrinho.CarrinhoNaoEncontrado;
 import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsCategoria.CategoiraJaCriada;
 import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsCategoria.CategoriaNaoEncontrada;
 import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsImagem.ErroSalvarImagem;
@@ -46,12 +47,17 @@ public class GlobalExceptionHandler {
         return new ErroResponse(HttpStatus.NOT_FOUND.value(), e.getMessage());
     }
 
+    @ExceptionHandler(CarrinhoNaoEncontrado.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErroResponse handleCarrinhoNaoEncontrado(CarrinhoNaoEncontrado e){
+        return new ErroResponse(HttpStatus.NOT_FOUND.value(), e.getMessage());
+    }
+
     @ExceptionHandler(CategoiraJaCriada.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErroResponse handleCategoriaJaCriada(CategoiraJaCriada e){
         return new ErroResponse(HttpStatus.CONFLICT.value(), e.getMessage());
     }
-
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

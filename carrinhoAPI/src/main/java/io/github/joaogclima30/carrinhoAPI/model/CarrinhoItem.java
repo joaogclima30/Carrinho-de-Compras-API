@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class CartItem {
+public class CarrinhoItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +27,7 @@ public class CartItem {
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "cart_id")
-    private Cart cart;
+    private Carrinho carrinho;
 
     public void setTotalPrice(){
         this.precoTotal = this.precoUnico.multiply(new BigDecimal(quantidade));
