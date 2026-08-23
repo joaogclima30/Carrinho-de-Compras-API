@@ -1,5 +1,6 @@
 package io.github.joaogclima30.carrinhoAPI.service.Carrinho;
 
+import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsCarrinho.CarrinhoNaoEncontrado;
 import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsProdutos.ProdutoNaoEncontrado;
 import io.github.joaogclima30.carrinhoAPI.model.Carrinho;
 import io.github.joaogclima30.carrinhoAPI.model.CarrinhoItem;
@@ -26,7 +27,7 @@ public class CarrinhoItemService {
 
         Carrinho carrinhoEncontrado = carrinhoRepository
                 .findById(carrinhoId)
-                .orElseThrow(() -> new RuntimeException("Carrinho não encontrado"));
+                .orElseThrow(() -> new CarrinhoNaoEncontrado("Carrinho não encontrado"));
 
         Produto produto = produtoService.obterPorId(produtoId);
 
@@ -56,7 +57,7 @@ public class CarrinhoItemService {
     public void removerItemDoCarrinho(Long carrinhoId, Long produtoId){
         Carrinho carrinhoEncontrado = carrinhoRepository
                 .findById(carrinhoId)
-                .orElseThrow(() -> new RuntimeException("Carrinho não encontrado"));
+                .orElseThrow(() -> new CarrinhoNaoEncontrado("Carrinho não encontrado"));
         CarrinhoItem itemParaRemover = listarCarrinhoItem(carrinhoId,produtoId);
         carrinhoEncontrado.removerItem(itemParaRemover);
         carrinhoRepository.save(carrinhoEncontrado);
@@ -67,7 +68,7 @@ public class CarrinhoItemService {
 
         Carrinho carrinhoEncontrado = carrinhoRepository
                 .findById(carrinhoId)
-                .orElseThrow(() -> new RuntimeException("Carrinho não encontrado"));
+                .orElseThrow(() -> new CarrinhoNaoEncontrado("Carrinho não encontrado"));
 
         carrinhoEncontrado.getCarrinhoItems()
                 .stream()
@@ -85,7 +86,7 @@ public class CarrinhoItemService {
     public CarrinhoItem listarCarrinhoItem(Long carrinhoId,Long produtoId){
         Carrinho carrinhoEncontrado = carrinhoRepository
                 .findById(carrinhoId)
-                .orElseThrow(() -> new RuntimeException("Carrinho não encontrado"));
+                .orElseThrow(() -> new CarrinhoNaoEncontrado("Carrinho não encontrado"));
         return carrinhoEncontrado.getCarrinhoItems()
                 .stream()
                 .filter(item -> item.getProduto().getId().equals(produtoId))

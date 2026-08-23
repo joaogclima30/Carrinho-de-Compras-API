@@ -8,6 +8,8 @@ import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsImagem.ErroSalvar
 import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsImagem.ImagemNãoExiste;
 import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsProdutos.ProdutoNaoEncontrado;
 import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsProdutos.produtoJaCadastrado;
+import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsUsuario.UsuarioNaoEncontrado;
+import io.github.joaogclima30.carrinhoAPI.exceptions.ExpectionsPedidos.PedidoNaoEncontrado;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -35,6 +37,12 @@ public class GlobalExceptionHandler {
         return new ErroResponse(HttpStatus.NOT_FOUND.value(), e.getMessage());
     }
 
+    @ExceptionHandler(PedidoNaoEncontrado.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErroResponse handlePedidoNaoEncontrado(PedidoNaoEncontrado e){
+        return new ErroResponse(HttpStatus.NOT_FOUND.value(), e.getMessage());
+    }
+
     @ExceptionHandler(produtoJaCadastrado.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErroResponse handleProdutoJaCadastrado(produtoJaCadastrado e){
@@ -57,6 +65,12 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErroResponse handleCategoriaJaCriada(CategoiraJaCriada e){
         return new ErroResponse(HttpStatus.CONFLICT.value(), e.getMessage());
+    }
+
+    @ExceptionHandler(UsuarioNaoEncontrado.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErroResponse handleUsuarioNaoEncontrado(UsuarioNaoEncontrado e){
+        return new ErroResponse(HttpStatus.NOT_FOUND.value(), e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

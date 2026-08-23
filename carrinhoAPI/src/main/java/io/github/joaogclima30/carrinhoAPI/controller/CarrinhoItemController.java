@@ -1,5 +1,6 @@
 package io.github.joaogclima30.carrinhoAPI.controller;
 
+import io.github.joaogclima30.carrinhoAPI.model.CarrinhoItem;
 import io.github.joaogclima30.carrinhoAPI.response.ApiResponse;
 import io.github.joaogclima30.carrinhoAPI.service.Carrinho.CarrinhoItemService;
 import io.github.joaogclima30.carrinhoAPI.service.Carrinho.CarrinhoService;
@@ -24,7 +25,7 @@ public class CarrinhoItemController {
         return ResponseEntity.ok(new ApiResponse("Item adicionado", null));
     }
 
-    @GetMapping("/{carrinhoId}/item/{produtoId}/remover")
+    @DeleteMapping("/{carrinhoId}/item/{produtoId}/remover")
     public ResponseEntity<ApiResponse> removerItem(@PathVariable Long carrinhoId,
                                                    @PathVariable Long produtoId){
         carrinhoItemService.removerItemDoCarrinho(carrinhoId,produtoId);
@@ -39,4 +40,10 @@ public class CarrinhoItemController {
         return ResponseEntity.ok(new ApiResponse("Item atualizado", null));
     }
 
+    @GetMapping("/{carrinhoId}/item/{produtoId}/listarCarrinho")
+    public ResponseEntity<ApiResponse> listarItensCarrinhos(@PathVariable Long carrinhoId,
+                                                            @PathVariable Long produtoId){
+       CarrinhoItem carrinhoEncontrado = carrinhoItemService.listarCarrinhoItem(carrinhoId,produtoId);
+       return ResponseEntity.ok(new ApiResponse("Carrinho Listado", carrinhoEncontrado));
+    }
 }
