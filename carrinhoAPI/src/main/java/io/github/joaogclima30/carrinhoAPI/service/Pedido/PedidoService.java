@@ -1,6 +1,8 @@
 package io.github.joaogclima30.carrinhoAPI.service.Pedido;
 
+import io.github.joaogclima30.carrinhoAPI.dto.PedidoDTO.PedidoRequestDTO;
 import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsCarrinho.CarrinhoNaoEncontrado;
+import io.github.joaogclima30.carrinhoAPI.exceptions.ExpectionsPedidos.PedidoNaoEncontrado;
 import io.github.joaogclima30.carrinhoAPI.model.Carrinho;
 import io.github.joaogclima30.carrinhoAPI.model.Enum.PedidoStatus;
 import io.github.joaogclima30.carrinhoAPI.model.Pedido;
@@ -12,10 +14,12 @@ import io.github.joaogclima30.carrinhoAPI.repository.ProdutoRepository;
 import io.github.joaogclima30.carrinhoAPI.service.Carrinho.CarrinhoService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -28,11 +32,13 @@ public class PedidoService {
     private final ProdutoRepository produtoRepository;
     private final CarrinhoRepository carrinhoRepository;
     private final CarrinhoService carrinhoService;
+    private final ModelMapper modelMapper;
 
     @Transactional
     public Pedido fazerPedido(Long usuarioId){
         Carrinho carrinhoEncontrado = carrinhoRepository
-                .findById(usuarioId).orElseThrow(() -> new CarrinhoNaoEncontrado("Carrinho não encontrado"));
+                .findByUsuarioId(usuarioId)
+                .orElseThrow(() -> new CarrinhoNaoEncontrado("Carrinho não encontrado"));
 
         Pedido pedido = criarPedido(carrinhoEncontrado);
         List<PedidoItem> pedidoItems = criarPedidoItem(pedido,carrinhoEncontrado);
@@ -51,7 +57,7 @@ public class PedidoService {
         pedido.setUsuario(carrinho.getUsuario());
 
         pedido.setPedidoStatus(PedidoStatus.PENDENTE);
-        pedido.setPedidoHorario(LocalDate.now());
+        pedido.setPedidoHorario(LocalDateTime.now());
         return pedido;
     }
 
@@ -76,11 +82,19 @@ public class PedidoService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public Optional<Pedido> listarPedido(Long pedidoId){
-        return pedidoRepository.findById(pedidoId);
+    public PedidoRequestDTO listarPedido(Long pedidoId){
+        return pedidoRepository.findById(pedidoId)
+                .map(this::converterToDTO)
+                .orElseThrow(() -> new PedidoNaoEncontrado("Pedido não Encontrado"));
     }
 
-    public List<Pedido> listarPedidosPorUsuario(Long usuarioId){
-        return pedidoRepository.findByUsuarioId(usuarioId);
+    public List<PedidoRequestDTO> listarPedidosPorUsuario(Long usuarioId){
+        List<PedidoRequestDTO> pedidos = pedidoRepository.findByUsuarioId(usuarioId);
+        return pedidos.stream().map(this ::converterToDTO).toList();
     }
+
+    private PedidoRequestDTO converterToDTO(Pedido pedido){
+        return modelMapper.map(pedido,PedidoRequestDTO.class);
+    }
+
 }

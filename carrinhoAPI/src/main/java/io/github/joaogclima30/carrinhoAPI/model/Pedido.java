@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,7 +21,7 @@ public class Pedido {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long pedidoId;
-    private LocalDate pedidoHorario;
+    private LocalDateTime pedidoHorario;
     private BigDecimal totalPedido;
 
     @Enumerated(EnumType.STRING)

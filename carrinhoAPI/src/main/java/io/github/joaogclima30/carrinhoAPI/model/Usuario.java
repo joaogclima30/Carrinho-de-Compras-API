@@ -31,5 +31,9 @@ public class Usuario {
     private List<Pedido> pedidos;
 
     public Usuario(String primeiroNome, String sobrenome, String email, String senha) {
+        this.primeiroNome = primeiroNome;
+        this.sobrenome = sobrenome;
+        this.email = email;
+        this.senha = senha;
     }
 }
