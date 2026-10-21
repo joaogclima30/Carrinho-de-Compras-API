@@ -1,33 +1,31 @@
 package io.github.joaogclima30.carrinhoAPI.service.Produto;
 
-import io.github.joaogclima30.carrinhoAPI.dto.ImagemDTO.ImagemDTO;
 import io.github.joaogclima30.carrinhoAPI.dto.ProdutoDTO.ProdutoRequestDTO;
+import io.github.joaogclima30.carrinhoAPI.dto.ProdutoDTO.ProdutoResponseDTO;
+import io.github.joaogclima30.carrinhoAPI.mapper.DtoMapper;
 import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsProdutos.ProdutoNaoEncontrado;
 import io.github.joaogclima30.carrinhoAPI.model.Categoria;
-import io.github.joaogclima30.carrinhoAPI.model.Imagem;
 import io.github.joaogclima30.carrinhoAPI.model.Produto;
 import io.github.joaogclima30.carrinhoAPI.repository.CategoriaRepository;
-import io.github.joaogclima30.carrinhoAPI.repository.ImagemRepository;
 import io.github.joaogclima30.carrinhoAPI.repository.ProdutoRepository;
 import io.github.joaogclima30.carrinhoAPI.validator.ProdutoValidator;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@org.springframework.transaction.annotation.Transactional
 @RequiredArgsConstructor
+@org.springframework.validation.annotation.Validated
 public class ProdutoService {
 
     private final ProdutoRepository produtoRepository;
     private final CategoriaRepository categoriaRepository;
     private final ProdutoValidator produtoValidator;
-    private final ModelMapper modelMapper;
-    private final ImagemRepository imagemRepository;
 
-    public Produto salvarProduto(ProdutoRequestDTO produtoRequestDTO){
+    public Produto salvarProduto(@jakarta.validation.Valid ProdutoRequestDTO produtoRequestDTO){
         produtoValidator.validarProduto(produtoRequestDTO);
 
         Produto produto = new Produto(
@@ -36,7 +34,7 @@ public class ProdutoService {
                 produtoRequestDTO.getPreco(),
                 produtoRequestDTO.getEstoque(),
                 produtoRequestDTO.getDescricao(),
-                produtoRequestDTO.getCategoria()
+                new Categoria(produtoRequestDTO.getCategoria().getNome())
         );
         produto.setCategoria(resolverCategoria(produto.getCategoria()));
         return produtoRepository.save(produto);
@@ -62,16 +60,17 @@ public class ProdutoService {
     }
 
 
-    public Produto atualizarProduto(ProdutoRequestDTO produtoAtualizado, Long id){
+    public Produto atualizarProduto(@jakarta.validation.Valid ProdutoRequestDTO produtoAtualizado, Long id){
         Produto produtoExistente = produtoRepository.findById(id)
                 .orElseThrow(() -> new ProdutoNaoEncontrado("Produto não existe"));
 
+        produtoValidator.validarAtualizacao(produtoAtualizado, id);
         produtoExistente.setNome(produtoAtualizado.getNome());
         produtoExistente.setMarca(produtoAtualizado.getMarca());
         produtoExistente.setPrice(produtoAtualizado.getPreco());
         produtoExistente.setEstoque(produtoAtualizado.getEstoque());
         produtoExistente.setDescricao(produtoAtualizado.getDescricao());
-        produtoExistente.setCategoria(resolverCategoria(produtoAtualizado.getCategoria()));
+        produtoExistente.setCategoria(resolverCategoria(new Categoria(produtoAtualizado.getCategoria().getNome())));
 
         return produtoRepository.save(produtoExistente);
     }
@@ -104,15 +103,11 @@ public class ProdutoService {
         return produtoRepository.countByMarcaAndNome(marca,nome);
      }
 
-     public List<ProdutoRequestDTO> listarProdutosConvertidos(List<Produto> produtos){
+     public List<ProdutoResponseDTO> listarProdutosConvertidos(List<Produto> produtos){
         return produtos.stream().map(this::converterParaDto).toList();
      }
 
-     public ProdutoRequestDTO converterParaDto(Produto produto){
-        ProdutoRequestDTO produtoRequestDTO = modelMapper.map(produto,ProdutoRequestDTO.class);
-        List<Imagem> imagems = imagemRepository.findByProdutoId(produto.getId());
-        List<ImagemDTO> imagemDTOS = imagems.stream().map(imagem -> modelMapper.map(imagem, ImagemDTO.class)).toList();
-        produtoRequestDTO.setImagensDto(imagemDTOS);
-        return produtoRequestDTO;
+    public ProdutoResponseDTO converterParaDto(Produto produto) {
+        return DtoMapper.produto(produto);
     }
 }

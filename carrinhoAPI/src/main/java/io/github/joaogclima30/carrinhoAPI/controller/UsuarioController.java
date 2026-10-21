@@ -7,6 +7,7 @@ import io.github.joaogclima30.carrinhoAPI.response.ApiResponse;
 import io.github.joaogclima30.carrinhoAPI.service.Usuario.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import io.github.joaogclima30.carrinhoAPI.mapper.DtoMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,19 +21,22 @@ public class UsuarioController {
     @PostMapping
     public ResponseEntity<ApiResponse> criarUsuario(@Valid @RequestBody UsuarioCriarDTO dto){
         Usuario usuario = usuarioService.criarUsuario(dto);
-        return ResponseEntity.ok(new ApiResponse("Usuário criado com sucesso", usuario));
+        var usuarioCriarDTO = DtoMapper.usuario(usuario);
+        return ResponseEntity.ok(new ApiResponse("Usuário criado com sucesso", usuarioCriarDTO));
     }
 
     @GetMapping("/{usuarioId}/listarUsuario")
     public ResponseEntity<ApiResponse> listarUsuario(@PathVariable Long usuarioId){
         Usuario usuario = usuarioService.listarUsuarioPorId(usuarioId);
-        return ResponseEntity.ok(new ApiResponse("Sucesso", usuario));
+        var usuarioCriarDTO = DtoMapper.usuario(usuario);
+        return ResponseEntity.ok(new ApiResponse("Sucesso", usuarioCriarDTO));
     }
 
     @PutMapping("/{usuarioId}/atualizar")
     public ResponseEntity<ApiResponse> atualizarUsuario(@PathVariable Long usuarioId, @Valid @RequestBody UsuarioAtualizarDTO dto){
         Usuario usuario = usuarioService.atualizarUsuario(dto, usuarioId);
-        return ResponseEntity.ok(new ApiResponse("Usuário atualizado", usuario));
+        UsuarioAtualizarDTO usuarioAtualizar = usuarioService.converterParaDtoAtualizar(usuario);
+        return ResponseEntity.ok(new ApiResponse("Usuário atualizado", usuarioAtualizar));
     }
 
     @DeleteMapping("/{usuarioId}/deletar")

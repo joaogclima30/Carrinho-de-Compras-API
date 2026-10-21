@@ -4,6 +4,7 @@ import io.github.joaogclima30.carrinhoAPI.model.Carrinho;
 import io.github.joaogclima30.carrinhoAPI.response.ApiResponse;
 import io.github.joaogclima30.carrinhoAPI.service.Carrinho.CarrinhoService;
 import lombok.RequiredArgsConstructor;
+import io.github.joaogclima30.carrinhoAPI.mapper.DtoMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ public class CarrinhoController {
     @GetMapping("/{carrinhoId}/listarCarrinho")
     public ResponseEntity<ApiResponse> listarCarrinho(@PathVariable Long carrinhoId){
         Carrinho carrinho = carrinhoService.listarCarrinho(carrinhoId);
-        return ResponseEntity.ok(new ApiResponse("Sucesso", carrinho));
+        return ResponseEntity.ok(new ApiResponse("Sucesso", DtoMapper.carrinho(carrinho)));
     }
 
     @DeleteMapping("/{carrinhoId}/limparCarrinho")

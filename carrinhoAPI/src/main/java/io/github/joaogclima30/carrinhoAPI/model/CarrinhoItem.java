@@ -2,15 +2,18 @@ package io.github.joaogclima30.carrinhoAPI.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(name = "uk_carrinho_produto", columnNames = {"cart_id", "produto_id"}))
 public class CarrinhoItem {
 
     @Id
@@ -21,12 +24,12 @@ public class CarrinhoItem {
     private BigDecimal precoUnico;
     private BigDecimal precoTotal;
 
-    @ManyToOne
-    @JoinColumn(name = "produto_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "produto_id", nullable = false)
     private Produto produto;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "cart_id")
+    @ManyToOne
+    @JoinColumn(name = "cart_id", nullable = false)
     private Carrinho carrinho;
 
     public void setTotalPrice(){

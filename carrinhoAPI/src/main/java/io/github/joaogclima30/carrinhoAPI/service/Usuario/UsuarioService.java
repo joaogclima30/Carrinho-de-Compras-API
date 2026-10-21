@@ -2,19 +2,21 @@ package io.github.joaogclima30.carrinhoAPI.service.Usuario;
 
 import io.github.joaogclima30.carrinhoAPI.dto.UsuarioDTO.UsuarioAtualizarDTO;
 import io.github.joaogclima30.carrinhoAPI.dto.UsuarioDTO.UsuarioCriarDTO;
-import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsProdutos.ProdutoNaoEncontrado;
+import io.github.joaogclima30.carrinhoAPI.dto.UsuarioDTO.UsuarioResponseDTO;
 import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsUsuario.UsuarioNaoEncontrado;
-import io.github.joaogclima30.carrinhoAPI.model.Produto;
 import io.github.joaogclima30.carrinhoAPI.model.Usuario;
 import io.github.joaogclima30.carrinhoAPI.repository.UsuarioRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Validated
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
@@ -24,7 +26,10 @@ public class UsuarioService {
         return usuarioRepository.findById(usuarioId).orElseThrow(() -> new UsuarioNaoEncontrado("Usuario não Existente"));
     }
 
-    public Usuario criarUsuario(UsuarioCriarDTO usuarioCriarDTO) {
+    public Usuario criarUsuario(@Valid UsuarioCriarDTO usuarioCriarDTO) {
+        if (usuarioRepository.existsByEmail(usuarioCriarDTO.getEmail())) {
+            throw new io.github.joaogclima30.carrinhoAPI.exceptions.ConflitoException("E-mail já cadastrado");
+        }
         Usuario usuario = new Usuario(
                 usuarioCriarDTO.getPrimeiroNome(),
                 usuarioCriarDTO.getSobrenome(),
@@ -34,7 +39,7 @@ public class UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
-    public Usuario atualizarUsuario(UsuarioAtualizarDTO usuarioAtualizarDTO, Long usuarioId){
+    public Usuario atualizarUsuario(@Valid UsuarioAtualizarDTO usuarioAtualizarDTO, Long usuarioId){
         return usuarioRepository.findById(usuarioId)
                 .map(existeUsuario -> {
                     existeUsuario.setPrimeiroNome(usuarioAtualizarDTO.getPrimeiroNome());
@@ -55,5 +60,14 @@ public class UsuarioService {
     public UsuarioAtualizarDTO converterParaDtoAtualizar(Usuario usuario){
         UsuarioAtualizarDTO usuarioAtualizarDTO = modelMapper.map(usuario,UsuarioAtualizarDTO.class);
         return usuarioAtualizarDTO;
+    }
+
+    public UsuarioResponseDTO converterParaUsuarioParaDto(Usuario usuario){
+        UsuarioResponseDTO usuarioResponseDTO = modelMapper.map(usuario,UsuarioResponseDTO.class);
+        return usuarioResponseDTO;
+    }
+
+    public Usuario getUserById(Long usuarioId) {
+        return usuarioRepository.findById(usuarioId);
     }
 }

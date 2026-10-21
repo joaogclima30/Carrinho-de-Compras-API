@@ -13,6 +13,7 @@ public class UsuarioCriarDTO {
     @NotBlank(message = "Sobrenome é obrigatório")
     private String sobrenome;
 
+    @jakarta.validation.constraints.Size(max = 255)
     @NotBlank @Email(message = "Email inválido")
     private String email;
 

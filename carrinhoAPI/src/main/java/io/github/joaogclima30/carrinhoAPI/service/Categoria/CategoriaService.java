@@ -12,20 +12,23 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@org.springframework.transaction.annotation.Transactional
 @RequiredArgsConstructor
+@org.springframework.validation.annotation.Validated
 public class CategoriaService {
 
     public final CategoriaRepository categoriaRepository;
     public final CategoriaValidator categoriaValidator;
 
 
-    public Categoria salvarCategoria(Categoria categoria){
+    public Categoria salvarCategoria(@jakarta.validation.Valid Categoria categoria){
         categoriaValidator.validarCategoria(categoria);
         return categoriaRepository.save(categoria);
     }
 
-    public Categoria atualizarCategoria(CategoriaRequestDTO dto, Long id){
+    public Categoria atualizarCategoria(@jakarta.validation.Valid CategoriaRequestDTO dto, Long id){
         Categoria categoria = categoriaPorId(id);
+        categoriaValidator.validarAtualizacao(dto.getNome(), id);
         categoria.setNome(dto.getNome());
         return categoriaRepository.save(categoria);
     }

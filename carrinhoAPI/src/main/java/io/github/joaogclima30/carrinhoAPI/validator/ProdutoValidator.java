@@ -20,6 +20,12 @@ public class ProdutoValidator {
         }
     }
 
+    public void validarAtualizacao(ProdutoRequestDTO dto, Long id) {
+        if (produtoRepository.existsByNomeAndMarcaAndIdNot(dto.getNome(), dto.getMarca(), id)) {
+            throw new produtoJaCadastrado("Produto já foi cadastrado");
+        }
+    }
+
     public boolean existeProdutoCadastrado(Produto produto){
         if(produto.getId() == null){
             return false;
@@ -27,4 +33,3 @@ public class ProdutoValidator {
         return produtoRepository.existsById(produto.getId());
     }
 }
-

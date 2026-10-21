@@ -3,13 +3,15 @@ package io.github.joaogclima30.carrinhoAPI.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Categoria {
@@ -18,7 +20,9 @@ public class Categoria {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nome")
+    @Column(name = "nome", nullable = false, unique = true)
+    @jakarta.validation.constraints.NotBlank
+    @jakarta.validation.constraints.Size(max = 255)
     private String nome;
 
     @JsonIgnore

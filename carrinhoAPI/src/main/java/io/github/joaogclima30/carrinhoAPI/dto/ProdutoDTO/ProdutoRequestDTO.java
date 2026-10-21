@@ -1,19 +1,23 @@
 package io.github.joaogclima30.carrinhoAPI.dto.ProdutoDTO;
 
-import io.github.joaogclima30.carrinhoAPI.dto.ImagemDTO.ImagemDTO;
-import io.github.joaogclima30.carrinhoAPI.model.Categoria;
+import io.github.joaogclima30.carrinhoAPI.dto.CategoriaDTO.CategoriaRequestDTO;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import lombok.Data;
-
 import java.math.BigDecimal;
-import java.util.List;
 
 @Data
 public class ProdutoRequestDTO {
+    @NotBlank @Size(max = 255)
     private String nome;
+    @NotBlank @Size(max = 255)
     private String marca;
+    @NotNull @Positive @Digits(integer = 17, fraction = 2)
     private BigDecimal preco;
-    private int estoque;
+    @NotNull @PositiveOrZero
+    private Integer estoque;
+    @Size(max = 255)
     private String descricao;
-    private Categoria categoria;
-    private List<ImagemDTO> imagensDto;
+    @NotNull @Valid
+    private CategoriaRequestDTO categoria;
 }

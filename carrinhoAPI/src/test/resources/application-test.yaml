@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:carrinho-tests;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=10000
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: create-drop

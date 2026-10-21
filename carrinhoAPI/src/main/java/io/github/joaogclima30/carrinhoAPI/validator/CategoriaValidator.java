@@ -19,6 +19,12 @@ public class CategoriaValidator {
         }
     }
 
+    public void validarAtualizacao(String nome, Long id) {
+        if (categoriaRepository.existsByNomeAndIdNot(nome, id)) {
+            throw new CategoiraJaCriada("Categoria já cadastrada");
+        }
+    }
+
     public boolean existeCategoriaCriada(Categoria categoria){
         if(categoria.getId() == null){
             return false;

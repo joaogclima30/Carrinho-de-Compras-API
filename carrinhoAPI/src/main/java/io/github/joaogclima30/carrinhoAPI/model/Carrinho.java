@@ -39,6 +39,12 @@ public class Carrinho {
         atualizarQuantidadeTotal();
     }
 
+    public void limpar() {
+        carrinhoItems.forEach(item -> item.setCarrinho(null));
+        carrinhoItems.clear();
+        atualizarQuantidadeTotal();
+    }
+
     public void atualizarQuantidadeTotal(){
         this.quantidadeTotal = carrinhoItems.stream().map(item -> {
             BigDecimal precoUnico = item.getPrecoUnico();

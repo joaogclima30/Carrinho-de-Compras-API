@@ -20,6 +20,7 @@ public class Usuario {
     private String sobrenome;
 
     @Email
+    @Column(nullable = false, unique = true)
     private String email;
 
     private String senha;

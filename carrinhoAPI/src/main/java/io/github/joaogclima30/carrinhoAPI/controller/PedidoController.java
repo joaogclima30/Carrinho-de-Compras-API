@@ -6,6 +6,7 @@ import io.github.joaogclima30.carrinhoAPI.model.Pedido;
 import io.github.joaogclima30.carrinhoAPI.response.ApiResponse;
 import io.github.joaogclima30.carrinhoAPI.service.Pedido.PedidoService;
 import lombok.RequiredArgsConstructor;
+import io.github.joaogclima30.carrinhoAPI.mapper.DtoMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +22,7 @@ public class PedidoController {
     @PostMapping("/{usuarioId}")
     public ResponseEntity<ApiResponse> fazerPedido(@PathVariable Long usuarioId){
         Pedido pedido = pedidoService.fazerPedido(usuarioId);
-        return ResponseEntity.ok(new ApiResponse("Pedido realizado com sucesso", pedido));
+        return ResponseEntity.ok(new ApiResponse("Pedido realizado com sucesso", DtoMapper.pedido(pedido)));
     }
 
     @GetMapping("/{pedidoId}")

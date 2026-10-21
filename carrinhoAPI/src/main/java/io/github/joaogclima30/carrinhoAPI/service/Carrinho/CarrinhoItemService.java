@@ -1,95 +1,78 @@
 package io.github.joaogclima30.carrinhoAPI.service.Carrinho;
 
+import io.github.joaogclima30.carrinhoAPI.exceptions.DadosInvalidosException;
+import io.github.joaogclima30.carrinhoAPI.exceptions.ConflitoException;
 import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsCarrinho.CarrinhoNaoEncontrado;
 import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsProdutos.ProdutoNaoEncontrado;
-import io.github.joaogclima30.carrinhoAPI.model.Carrinho;
-import io.github.joaogclima30.carrinhoAPI.model.CarrinhoItem;
-import io.github.joaogclima30.carrinhoAPI.model.Produto;
-import io.github.joaogclima30.carrinhoAPI.repository.CarrinhoItemRepository;
+import io.github.joaogclima30.carrinhoAPI.model.*;
 import io.github.joaogclima30.carrinhoAPI.repository.CarrinhoRepository;
 import io.github.joaogclima30.carrinhoAPI.service.Produto.ProdutoService;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-
 @RequiredArgsConstructor
 @Service
+@Transactional
 public class CarrinhoItemService {
-
-    private final CarrinhoItemRepository carrinhoItemRepository;
     private final CarrinhoRepository carrinhoRepository;
     private final ProdutoService produtoService;
 
-    @Transactional
     public void salvarItem(Long carrinhoId, Long produtoId, int quantidade) {
-
-        Carrinho carrinhoEncontrado = carrinhoRepository
-                .findById(carrinhoId)
-                .orElseThrow(() -> new CarrinhoNaoEncontrado("Carrinho não encontrado"));
-
+        validarQuantidade(quantidade);
+        Carrinho carrinho = buscarParaAtualizar(carrinhoId);
         Produto produto = produtoService.obterPorId(produtoId);
-
-        CarrinhoItem carrinhoItem = carrinhoEncontrado.getCarrinhoItems()
-                .stream()
-                .filter(item -> item.getProduto().getId().equals(produtoId))
-                .findFirst()
-                .orElse(new CarrinhoItem());
-
-        if (carrinhoItem.getId() == null) {
-            carrinhoItem.setProduto(produto);
-            carrinhoItem.setQuantidade(quantidade);
-            carrinhoItem.setCarrinho(carrinhoEncontrado);
-            carrinhoItem.setPrecoUnico(produto.getPrice());
-        } else {
-            carrinhoItem.setQuantidade(
-                    carrinhoItem.getQuantidade() + quantidade
-            );
+        CarrinhoItem item = carrinho.getCarrinhoItems().stream()
+                .filter(i -> i.getProduto().getId().equals(produtoId)).findFirst().orElse(null);
+        long novaQuantidade = (long) quantidade + (item == null ? 0 : item.getQuantidade());
+        if (novaQuantidade > produto.getEstoque()) {
+            throw new ConflitoException("Quantidade solicitada superior ao estoque disponível");
         }
-
-        carrinhoItem.setTotalPrice();
-
-        carrinhoEncontrado.adicionarItem(carrinhoItem);
+        if (item == null) {
+            item = new CarrinhoItem();
+            item.setProduto(produto);
+            item.setPrecoUnico(produto.getPrice());
+        }
+        item.setQuantidade((int) novaQuantidade);
+        item.setTotalPrice();
+        carrinho.adicionarItem(item);
     }
 
-    @Transactional
-    public void removerItemDoCarrinho(Long carrinhoId, Long produtoId){
-        Carrinho carrinhoEncontrado = carrinhoRepository
-                .findById(carrinhoId)
-                .orElseThrow(() -> new CarrinhoNaoEncontrado("Carrinho não encontrado"));
-        CarrinhoItem itemParaRemover = listarCarrinhoItem(carrinhoId,produtoId);
-        carrinhoEncontrado.removerItem(itemParaRemover);
-        carrinhoRepository.save(carrinhoEncontrado);
+    public void removerItemDoCarrinho(Long carrinhoId, Long produtoId) {
+        Carrinho carrinho = buscarParaAtualizar(carrinhoId);
+        carrinho.removerItem(encontrarItem(carrinho, produtoId));
     }
 
-    @Transactional
     public void atualizarQuantidadeItem(Long carrinhoId, Long produtoId, int quantidade) {
-
-        Carrinho carrinhoEncontrado = carrinhoRepository
-                .findById(carrinhoId)
-                .orElseThrow(() -> new CarrinhoNaoEncontrado("Carrinho não encontrado"));
-
-        carrinhoEncontrado.getCarrinhoItems()
-                .stream()
-                .filter(item -> item.getProduto().getId().equals(produtoId))
-                .findFirst()
-                .ifPresent(item -> {
-                    item.setQuantidade(quantidade);
-                    item.setPrecoUnico(item.getProduto().getPrice());
-                    item.setTotalPrice();
-                });
-
-        carrinhoEncontrado.atualizarQuantidadeTotal();
+        validarQuantidade(quantidade);
+        Carrinho carrinho = buscarParaAtualizar(carrinhoId);
+        CarrinhoItem item = encontrarItem(carrinho, produtoId);
+        if (quantidade > item.getProduto().getEstoque()) {
+            throw new ConflitoException("Quantidade solicitada superior ao estoque disponível");
+        }
+        item.setQuantidade(quantidade);
+        item.setPrecoUnico(item.getProduto().getPrice());
+        item.setTotalPrice();
+        carrinho.atualizarQuantidadeTotal();
     }
 
-    public CarrinhoItem listarCarrinhoItem(Long carrinhoId,Long produtoId){
-        Carrinho carrinhoEncontrado = carrinhoRepository
-                .findById(carrinhoId)
+    public CarrinhoItem listarCarrinhoItem(Long carrinhoId, Long produtoId) {
+        Carrinho carrinho = carrinhoRepository.findById(carrinhoId)
                 .orElseThrow(() -> new CarrinhoNaoEncontrado("Carrinho não encontrado"));
-        return carrinhoEncontrado.getCarrinhoItems()
-                .stream()
-                .filter(item -> item.getProduto().getId().equals(produtoId))
-                .findFirst().orElseThrow(()-> new ProdutoNaoEncontrado("Item não Encontrado"));
+        return encontrarItem(carrinho, produtoId);
+    }
+
+    private Carrinho buscarParaAtualizar(Long id) {
+        return carrinhoRepository.buscarParaAtualizar(id)
+                .orElseThrow(() -> new CarrinhoNaoEncontrado("Carrinho não encontrado"));
+    }
+
+    private CarrinhoItem encontrarItem(Carrinho carrinho, Long produtoId) {
+        return carrinho.getCarrinhoItems().stream().filter(i -> i.getProduto().getId().equals(produtoId))
+                .findFirst().orElseThrow(() -> new ProdutoNaoEncontrado("Item não encontrado"));
+    }
+
+    private void validarQuantidade(int quantidade) {
+        if (quantidade <= 0) throw new DadosInvalidosException("Quantidade deve ser maior que zero");
     }
 }

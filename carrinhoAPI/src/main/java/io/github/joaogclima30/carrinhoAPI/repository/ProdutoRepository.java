@@ -13,6 +13,12 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
     Optional<Produto> findById(Long id);
 
+    boolean existsByNomeAndMarcaAndIdNot(String nome, String marca, Long id);
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("select p from Produto p where p.id in :ids order by p.id")
+    List<Produto> buscarParaAtualizarEstoque(@org.springframework.data.repository.query.Param("ids") List<Long> ids);
+
     List<Produto> findByCategoriaNome(String categoria);
 
     List<Produto> findByMarca(String marca);
