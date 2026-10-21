@@ -1,7 +1,7 @@
 package io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsCategoria;
 
-public class CategoiraJaCriada extends RuntimeException {
-    public CategoiraJaCriada(String message) {
+public class CategoriaJaCriada extends RuntimeException {
+    public CategoriaJaCriada(String message) {
         super(message);
     }
 }

@@ -13,3 +13,11 @@ WHERE nome IS NULL OR TRIM(nome) = '' OR marca IS NULL OR TRIM(marca) = ''
 SELECT id FROM carrinho_item
 WHERE quantidade <= 0 OR preco_unico IS NULL OR preco_unico <= 0
    OR cart_id IS NULL OR produto_id IS NULL;
+
+
+-- Equivalências relevantes para o futuro login (apenas leitura):
+SELECT lower(btrim(email)) AS email_normalizado, COUNT(*)
+FROM usuario GROUP BY lower(btrim(email)) HAVING COUNT(*) > 1;
+SELECT id FROM usuario WHERE email IS NULL OR btrim(email) = '';
+SELECT id FROM carrinho WHERE usuario_id IS NULL;
+SELECT id FROM usuario WHERE length(primeiro_nome) > 255 OR length(sobrenome) > 255;

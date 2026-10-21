@@ -1,0 +1,8 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: ${SHOW_SQL:false}
+app:
+  seed:
+    enabled: ${DEV_SEED_ENABLED:false}

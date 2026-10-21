@@ -1,59 +1,30 @@
 package io.github.joaogclima30.carrinhoAPI.controller;
 
 import io.github.joaogclima30.carrinhoAPI.dto.CategoriaDTO.CategoriaRequestDTO;
-import io.github.joaogclima30.carrinhoAPI.model.Categoria;
 import io.github.joaogclima30.carrinhoAPI.response.ApiResponse;
 import io.github.joaogclima30.carrinhoAPI.service.Categoria.CategoriaService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import io.github.joaogclima30.carrinhoAPI.mapper.DtoMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
-@RequiredArgsConstructor
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("${api.prefix}/categorias")
 public class CategoriaController {
-
-    private final CategoriaService categoriaService;
-
+    private final CategoriaService service;
     @GetMapping("/todas")
-    public ResponseEntity<ApiResponse> listarTodasCategorias(){
-        List<Categoria> categorias = categoriaService.pesquisarTodasCategorias();
-        return ResponseEntity.ok(new ApiResponse("Encontrado!", categorias.stream().map(DtoMapper::categoria).toList()));
-    }
-
+    public ResponseEntity<ApiResponse> listarTodasCategorias() { return ok(service.listarTodasDto()); }
     @PostMapping("/salvar")
-    public ResponseEntity<ApiResponse> salvarCategorias(@Valid @RequestBody CategoriaRequestDTO dto){
-        Categoria categoriaSalva = categoriaService.salvarCategoria(new Categoria(dto.getNome()));
-        return ResponseEntity.ok(new ApiResponse("Salvo com Sucesso!", DtoMapper.categoria(categoriaSalva)));
-    }
-
+    public ResponseEntity<ApiResponse> salvarCategorias(@Valid @RequestBody CategoriaRequestDTO dto) { return ok(service.salvarCategoriaDto(dto)); }
     @PutMapping("/categoria/{id}/atualizar")
-    public ResponseEntity<ApiResponse> atualizarCategoria(@PathVariable Long id, @Valid @RequestBody CategoriaRequestDTO categoria){
-        Categoria categoriaEncontrada = categoriaService.atualizarCategoria(categoria, id);
-        return ResponseEntity.ok(new ApiResponse("Atualizado com Sucesso!", DtoMapper.categoria(categoriaEncontrada)));
-    }
-
+    public ResponseEntity<ApiResponse> atualizarCategoria(@PathVariable @Positive Long id, @Valid @RequestBody CategoriaRequestDTO dto) { return ok(service.atualizarCategoriaDto(dto, id)); }
     @DeleteMapping("/categoria/{id}/delete")
-    public ResponseEntity<ApiResponse> deletarCategoria(@PathVariable Long id){
-        categoriaService.deletarCategoriaPorId(id);
-        return ResponseEntity.ok(new ApiResponse("Deletado!", null));
-    }
-
+    public ResponseEntity<ApiResponse> deletarCategoria(@PathVariable @Positive Long id) { service.deletarCategoriaPorId(id); return ok(null); }
     @GetMapping("/categoria/{id}")
-    public ResponseEntity<ApiResponse> listarCategoriaPorId(@PathVariable Long id){
-        Categoria categoriaEncontrada = categoriaService.categoriaPorId(id);
-        return ResponseEntity.ok(new ApiResponse("Encontrado!", DtoMapper.categoria(categoriaEncontrada)));
-
-    }
-
+    public ResponseEntity<ApiResponse> listarCategoriaPorId(@PathVariable @Positive Long id) { return ok(service.listarPorIdDto(id)); }
     @GetMapping("/categoria/{nome}/procurar")
-    public ResponseEntity<ApiResponse> listarCategoriaPorNome(@PathVariable String nome){
-        Categoria categoriaEncontrada = categoriaService.categoriaPorNome(nome).orElseThrow(() -> new io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsCategoria.CategoriaNaoEncontrada("Não existe essa categoria"));
-        return ResponseEntity.ok(new ApiResponse("Encontrado!", DtoMapper.categoria(categoriaEncontrada)));
-    }
-
+    public ResponseEntity<ApiResponse> listarCategoriaPorNome(@PathVariable String nome) { return ok(service.listarPorNomeDto(nome)); }
+    private ResponseEntity<ApiResponse> ok(Object data) { return ResponseEntity.ok(new ApiResponse("Sucesso", data)); }
 }

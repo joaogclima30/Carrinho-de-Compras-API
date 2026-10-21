@@ -10,28 +10,33 @@ import io.github.joaogclima30.carrinhoAPI.dto.UsuarioDTO.UsuarioResponseDTO;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public final class DtoMapper {
-    private DtoMapper() {}
+@org.springframework.stereotype.Component
+public class DtoMapper {
+    private final String prefix;
 
-    public static CategoriaResponseDTO categoria(Categoria categoria) {
+    public DtoMapper(@org.springframework.beans.factory.annotation.Value("${api.prefix:/api/v1}") String prefix) {
+        this.prefix = prefix.replaceAll("/+$", "");
+    }
+
+    public CategoriaResponseDTO categoria(Categoria categoria) {
         return categoria == null ? null : new CategoriaResponseDTO(categoria.getId(), categoria.getNome());
     }
 
-    public static ImagemDTO imagem(Imagem imagem) {
+    public ImagemDTO imagem(Imagem imagem) {
         ImagemDTO dto = new ImagemDTO();
         dto.setId(imagem.getId());
         dto.setArquivoNome(imagem.getNomeArquivo());
-        dto.setDownloadUrl(imagem.getDownloadUrl());
+        dto.setDownloadUrl(prefix + "/imagens/imagem/download/" + imagem.getId());
         return dto;
     }
 
-    public static ProdutoResponseDTO produto(Produto produto) {
+    public ProdutoResponseDTO produto(Produto produto) {
         return new ProdutoResponseDTO(produto.getId(), produto.getNome(), produto.getMarca(),
                 produto.getPrice(), produto.getEstoque(), produto.getDescricao(), categoria(produto.getCategoria()),
-                produto.getImagens() == null ? List.of() : produto.getImagens().stream().map(DtoMapper::imagem).toList());
+                produto.getImagens() == null ? List.of() : produto.getImagens().stream().map(this::imagem).toList());
     }
 
-    public static CarrinhoItemDto item(CarrinhoItem item) {
+    public CarrinhoItemDto item(CarrinhoItem item) {
         CarrinhoItemDto dto = new CarrinhoItemDto();
         dto.setItemId(item.getId());
         dto.setQuantidade(item.getQuantidade());
@@ -40,16 +45,16 @@ public final class DtoMapper {
         return dto;
     }
 
-    public static CarrinhoDto carrinho(Carrinho carrinho) {
+    public CarrinhoDto carrinho(Carrinho carrinho) {
         CarrinhoDto dto = new CarrinhoDto();
         dto.setCarrinhoId(carrinho.getId());
         dto.setPrecoTotal(carrinho.getQuantidadeTotal());
-        dto.setItens(carrinho.getCarrinhoItems().stream().map(DtoMapper::item).collect(Collectors.toSet()));
+        dto.setItens(carrinho.getCarrinhoItems().stream().map(this::item).collect(Collectors.toSet()));
         return dto;
     }
 
-    public static PedidoRequestDTO pedido(Pedido pedido) {
-        PedidoRequestDTO dto = new PedidoRequestDTO();
+    public PedidoResponseDTO pedido(Pedido pedido) {
+        PedidoResponseDTO dto = new PedidoResponseDTO();
         dto.setPedidoId(pedido.getPedidoId());
         dto.setUsuarioId(pedido.getUsuario() == null ? null : pedido.getUsuario().getId());
         dto.setPedidoHorario(pedido.getPedidoHorario());
@@ -66,14 +71,14 @@ public final class DtoMapper {
         return dto;
     }
 
-    public static UsuarioResponseDTO usuario(Usuario usuario) {
+    public UsuarioResponseDTO usuario(Usuario usuario) {
         UsuarioResponseDTO dto = new UsuarioResponseDTO();
         dto.setId(usuario.getId());
         dto.setPrimeiroNome(usuario.getPrimeiroNome());
         dto.setSobrenome(usuario.getSobrenome());
         dto.setEmail(usuario.getEmail());
         dto.setCarrinho(usuario.getCarrinho() == null ? null : carrinho(usuario.getCarrinho()));
-        dto.setPedidos(usuario.getPedidos() == null ? List.of() : usuario.getPedidos().stream().map(DtoMapper::pedido).toList());
+        dto.setPedidos(usuario.getPedidos() == null ? List.of() : usuario.getPedidos().stream().map(this::pedido).toList());
         return dto;
     }
 }

@@ -1,67 +1,46 @@
 package io.github.joaogclima30.carrinhoAPI.controller;
 
-import io.github.joaogclima30.carrinhoAPI.dto.ImagemDTO.ImagemDTO;
-import io.github.joaogclima30.carrinhoAPI.model.Imagem;
 import io.github.joaogclima30.carrinhoAPI.response.ApiResponse;
 import io.github.joaogclima30.carrinhoAPI.service.Imagem.ImagemService;
-import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.sql.SQLException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-@RequiredArgsConstructor
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("${api.prefix}/imagens")
 public class ImagemController {
+    private final ImagemService service;
 
-    private final ImagemService imagemService;
-
-    @PostMapping("/upload")
-    public ResponseEntity<ApiResponse> salvarImagem(@Valid @RequestParam List<MultipartFile> files, @RequestParam Long produtoId){
-        List<ImagemDTO> imagemDtos = imagemService.salvarImagem(files,produtoId);
-        return ResponseEntity.ok(new ApiResponse("Salvo com Sucesso!", imagemDtos));
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse> salvarImagem(@RequestParam List<MultipartFile> files, @RequestParam @Positive Long produtoId) {
+        return ResponseEntity.ok(new ApiResponse("Imagens salvas", service.salvarImagem(files, produtoId)));
     }
 
-    //Verificar
-    @GetMapping("/imagem/dowload/{imagemId}")
-    public ResponseEntity<Resource> abaixarImagem(@PathVariable Long imagemId) throws SQLException {
-        var download = imagemService.buscarImagemParaDownload(imagemId);
-        ByteArrayResource resource = new ByteArrayResource(download.bytes());
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(download.tipoArquivo()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + download.nomeArquivo() + "\"")
-                .body(resource);
+    @GetMapping({"/imagem/download/{imagemId}", "/imagem/dowload/{imagemId}"})
+    public ResponseEntity<Resource> baixarImagem(@PathVariable @Positive Long imagemId) {
+        var download = service.buscarImagemParaDownload(imagemId);
+        return ResponseEntity.ok().contentType(MediaType.parseMediaType(download.tipoArquivo()))
+                .contentLength(download.bytes().length)
+                .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment().filename(download.nomeArquivo(), StandardCharsets.UTF_8).build().toString())
+                .body(new ByteArrayResource(download.bytes()));
     }
 
-    @PutMapping("/imagem/{imagemId}/atualizar")
-    public ResponseEntity<ApiResponse> atualizarImagem(@Valid @PathVariable Long imagemId, @RequestParam MultipartFile file){
-        Imagem imagem = imagemService.buscarImagem(imagemId);
-
-        if(imagem != null) {
-            imagemService.atualizarImagem(file, imagemId);
-            return ResponseEntity.ok(new ApiResponse("Atualizado com sucesso!", null));
-        }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponse("Não é possivel Atualizar", HttpStatus.INTERNAL_SERVER_ERROR));
+    @PutMapping(value = "/imagem/{imagemId}/atualizar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse> atualizarImagem(@PathVariable @Positive Long imagemId, @RequestParam MultipartFile file) {
+        service.atualizarImagem(file, imagemId);
+        return ResponseEntity.ok(new ApiResponse("Imagem atualizada", null));
     }
 
     @DeleteMapping("/imagem/{imagemId}/deletar")
-    public ResponseEntity<ApiResponse> deletarImagem(@Valid @PathVariable Long imagemId){
-        Imagem imagem = imagemService.buscarImagem(imagemId);
-        if(imagem != null) {
-            imagemService.deletarImagemPorId(imagemId);
-            return ResponseEntity.ok(new ApiResponse("Deletado com sucesso!", null));
-        }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponse("Não é possivel Delw", HttpStatus.INTERNAL_SERVER_ERROR));
+    public ResponseEntity<ApiResponse> deletarImagem(@PathVariable @Positive Long imagemId) {
+        service.deletarImagemPorId(imagemId);
+        return ResponseEntity.ok(new ApiResponse("Imagem excluída", null));
     }
 }

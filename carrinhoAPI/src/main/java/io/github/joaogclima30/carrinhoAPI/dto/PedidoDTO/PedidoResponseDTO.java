@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-public class PedidoRequestDTO {
+public class PedidoResponseDTO {
     private Long pedidoId;
     private Long usuarioId;
     private LocalDateTime pedidoHorario;

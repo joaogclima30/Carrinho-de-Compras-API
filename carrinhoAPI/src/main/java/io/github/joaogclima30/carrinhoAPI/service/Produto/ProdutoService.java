@@ -13,10 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
-@org.springframework.transaction.annotation.Transactional
+@org.springframework.transaction.annotation.Transactional(readOnly = true)
 @RequiredArgsConstructor
 @org.springframework.validation.annotation.Validated
 public class ProdutoService {
@@ -24,7 +23,9 @@ public class ProdutoService {
     private final ProdutoRepository produtoRepository;
     private final CategoriaRepository categoriaRepository;
     private final ProdutoValidator produtoValidator;
+    private final DtoMapper mapper;
 
+    @org.springframework.transaction.annotation.Transactional
     public Produto salvarProduto(@jakarta.validation.Valid ProdutoRequestDTO produtoRequestDTO){
         produtoValidator.validarProduto(produtoRequestDTO);
 
@@ -45,21 +46,19 @@ public class ProdutoService {
                 .orElseGet(() -> categoriaRepository.save(new Categoria(categoriaDoProduto.getNome())));
     }
 
-    //Verificar melhor forma para fazer verificação de produto não encontrado
-    public Optional<Produto> obterProduto(Long id){
-        return Optional.of(produtoRepository.findById(id).orElseThrow(()->new ProdutoNaoEncontrado("Produto não existe")));
-    }
 
     public Produto obterPorId(Long id){
         return produtoRepository.findById(id)
                 .orElseThrow(() -> new ProdutoNaoEncontrado("Produto não existe"));
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public void deletarProduto(Long id){
-        produtoRepository.deleteById(id);
+        produtoRepository.delete(obterPorId(id));
     }
 
 
+    @org.springframework.transaction.annotation.Transactional
     public Produto atualizarProduto(@jakarta.validation.Valid ProdutoRequestDTO produtoAtualizado, Long id){
         Produto produtoExistente = produtoRepository.findById(id)
                 .orElseThrow(() -> new ProdutoNaoEncontrado("Produto não existe"));
@@ -108,6 +107,24 @@ public class ProdutoService {
      }
 
     public ProdutoResponseDTO converterParaDto(Produto produto) {
-        return DtoMapper.produto(produto);
+        return mapper.produto(produto);
     }
+
+    @org.springframework.transaction.annotation.Transactional
+    public ProdutoResponseDTO salvarProdutoDto(@jakarta.validation.Valid ProdutoRequestDTO dto) {
+        return mapper.produto(salvarProduto(dto));
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public ProdutoResponseDTO atualizarProdutoDto(@jakarta.validation.Valid ProdutoRequestDTO dto, Long id) {
+        return mapper.produto(atualizarProduto(dto, id));
+    }
+
+    public ProdutoResponseDTO listarPorIdDto(Long id) { return mapper.produto(obterPorId(id)); }
+    public List<ProdutoResponseDTO> listarTodosDto() { return listarProdutosConvertidos(listarTodosProdutos()); }
+    public List<ProdutoResponseDTO> listarPorMarcaDto(String marca) { return listarProdutosConvertidos(listarProdutosPorMarca(marca)); }
+    public List<ProdutoResponseDTO> listarPorCategoriaDto(String categoria) { return listarProdutosConvertidos(listarProdutosPorCategoria(categoria)); }
+    public List<ProdutoResponseDTO> listarPorNomeDto(String nome) { return listarProdutosConvertidos(listarProdutoPorNome(nome)); }
+    public List<ProdutoResponseDTO> listarPorMarcaENomeDto(String marca, String nome) { return listarProdutosConvertidos(listarProdutoPorMarcaAndNome(marca, nome)); }
+    public List<ProdutoResponseDTO> listarPorCategoriaEMarcaDto(String categoria, String marca) { return listarProdutosConvertidos(listarProdutoPorCategoriaAndMarca(categoria, marca)); }
 }

@@ -1,6 +1,6 @@
 package io.github.joaogclima30.carrinhoAPI.validator;
 
-import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsCategoria.CategoiraJaCriada;
+import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsCategoria.CategoriaJaCriada;
 import io.github.joaogclima30.carrinhoAPI.model.Categoria;
 import io.github.joaogclima30.carrinhoAPI.repository.CategoriaRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,13 +15,13 @@ public class CategoriaValidator {
     public void validarCategoria(Categoria categoria){
         boolean duplicado = categoriaRepository.existsByNome(categoria.getNome());
         if(duplicado){
-            throw new CategoiraJaCriada("Categoria já cadastrada");
+            throw new CategoriaJaCriada("Categoria já cadastrada");
         }
     }
 
     public void validarAtualizacao(String nome, Long id) {
         if (categoriaRepository.existsByNomeAndIdNot(nome, id)) {
-            throw new CategoiraJaCriada("Categoria já cadastrada");
+            throw new CategoriaJaCriada("Categoria já cadastrada");
         }
     }
 

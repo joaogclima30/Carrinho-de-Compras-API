@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.Optional;
 
 public interface CarrinhoRepository extends JpaRepository<Carrinho, Long > {
-    Carrinho findByUsuarioId(Long usuarioId);
+    Optional<Carrinho> findByUsuarioId(Long usuarioId);
 
     @Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @Query("select c from Carrinho c where c.id = :id")

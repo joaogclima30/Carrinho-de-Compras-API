@@ -5,6 +5,10 @@ import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+
+import javax.management.relation.Role;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 @Getter
@@ -31,10 +35,27 @@ public class Usuario {
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Pedido> pedidos;
 
+    public void setEmail(String email) {
+        this.email = email == null ? null : email.strip().toLowerCase(java.util.Locale.ROOT);
+    }
+
+    @PrePersist
+    @PreUpdate
+    private void normalizarEmail() {
+        setEmail(email);
+    }
+
     public Usuario(String primeiroNome, String sobrenome, String email, String senha) {
         this.primeiroNome = primeiroNome;
         this.sobrenome = sobrenome;
-        this.email = email;
+        setEmail(email);
         this.senha = senha;
     }
+
+        @ManyToMany(fetch = FetchType.EAGER, cascade =
+                {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+        @JoinTable(name = "user_roles",  joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+        )
+    private Collection<Role> roles = new HashSet<>();
 }

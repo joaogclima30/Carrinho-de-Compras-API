@@ -1,7 +1,7 @@
 package io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsImagem;
 
-public class ImagemNãoExiste extends RuntimeException {
-    public ImagemNãoExiste(String message) {
+public class ImagemNaoExiste extends RuntimeException {
+    public ImagemNaoExiste(String message) {
         super(message);
     }
 }

@@ -1,10 +1,11 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:carrinho-tests;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=10000
-    username: sa
-    password: ""
-    driver-class-name: org.h2.Driver
+    url: ${TEST_DATABASE_URL:jdbc:h2:mem:carrinho-tests;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=10000}
+    username: ${TEST_DATABASE_USERNAME:sa}
+    password: ${TEST_DATABASE_PASSWORD:}
+    driver-class-name: ${TEST_DATABASE_DRIVER:org.h2.Driver}
   jpa:
+    open-in-view: false
     show-sql: false
     hibernate:
       ddl-auto: create-drop

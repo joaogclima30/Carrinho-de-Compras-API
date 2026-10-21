@@ -1,22 +1,21 @@
 package io.github.joaogclima30.carrinhoAPI.dto.UsuarioDTO;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
+import java.util.Locale;
 
 @Data
 public class UsuarioCriarDTO {
-    @NotBlank(message = "Primeiro nome é obrigatório")
+    @NotBlank @Size(max = 255)
     private String primeiroNome;
-
-    @NotBlank(message = "Sobrenome é obrigatório")
+    @NotBlank @Size(max = 255)
     private String sobrenome;
-
-    @jakarta.validation.constraints.Size(max = 255)
-    @NotBlank @Email(message = "Email inválido")
+    @NotBlank @Email @Size(max = 255)
     private String email;
-
-    @NotBlank @Size(min = 8, message = "Senha deve ter no mínimo 8 caracteres")
+    @NotBlank @Size(min = 8, max = 255)
     private String senha;
+
+    public void setEmail(String email) {
+        this.email = email == null ? null : email.strip().toLowerCase(Locale.ROOT);
+    }
 }

@@ -2,117 +2,97 @@ package io.github.joaogclima30.carrinhoAPI.exceptions;
 
 import io.github.joaogclima30.carrinhoAPI.dto.ErroResponse.ErroResponse;
 import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsCarrinho.CarrinhoNaoEncontrado;
-import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsCategoria.CategoiraJaCriada;
-import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsCategoria.CategoriaNaoEncontrada;
-import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsImagem.ErroSalvarImagem;
-import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsImagem.ImagemNãoExiste;
-import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsProdutos.ProdutoNaoEncontrado;
-import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsProdutos.produtoJaCadastrado;
+import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsCategoria.*;
+import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsImagem.*;
+import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsProdutos.*;
 import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsUsuario.UsuarioNaoEncontrado;
-import io.github.joaogclima30.carrinhoAPI.exceptions.ExpectionsPedidos.PedidoNaoEncontrado;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
+import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsPedidos.PedidoNaoEncontrado;
+import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.*;
+import org.springframework.http.*;
+import org.springframework.web.bind.*;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.multipart.MultipartException;
 
+@Slf4j
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+    @ExceptionHandler({CarrinhoNaoEncontrado.class, CategoriaNaoEncontrada.class, ImagemNaoExiste.class,
+            ProdutoNaoEncontrado.class, UsuarioNaoEncontrado.class, PedidoNaoEncontrado.class})
+    public ResponseEntity<ErroResponse> naoEncontrado(RuntimeException e) { return erro(404, e.getMessage()); }
 
-    @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErroResponse handleRestricoes(jakarta.validation.ConstraintViolationException e) {
-        String mensagem = e.getConstraintViolations().stream()
-                .map(violacao -> violacao.getPropertyPath() + ": " + violacao.getMessage())
-                .sorted().collect(java.util.stream.Collectors.joining("; "));
-        return new ErroResponse(400, mensagem);
-    }
+    @ExceptionHandler({ConflitoException.class, CategoriaJaCriada.class, ProdutoJaCadastradoException.class})
+    public ResponseEntity<ErroResponse> conflito(RuntimeException e) { return erro(409, e.getMessage()); }
 
     @ExceptionHandler(DadosInvalidosException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErroResponse handleDadosInvalidos(DadosInvalidosException e) {
-        return new ErroResponse(400, e.getMessage());
+    public ResponseEntity<ErroResponse> dadosInvalidos(DadosInvalidosException e) { return erro(400, e.getMessage()); }
+
+    @ExceptionHandler(ArquivoMuitoGrandeException.class)
+    public ResponseEntity<ErroResponse> arquivoGrande(ArquivoMuitoGrandeException e) { return erro(413, e.getMessage()); }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErroResponse> validacao(ConstraintViolationException e) {
+        String mensagem = e.getConstraintViolations().stream()
+                .map(v -> v.getPropertyPath() + ": " + v.getMessage()).sorted()
+                .collect(java.util.stream.Collectors.joining("; "));
+        return erro(400, mensagem);
     }
 
-    @ExceptionHandler(ConflitoException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErroResponse handleConflito(ConflitoException e) {
-        return new ErroResponse(409, e.getMessage());
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErroResponse> integridade(DataIntegrityViolationException e) {
+        log.warn("Operação rejeitada por restrição de integridade");
+        return erro(409, "Operação viola uma restrição de unicidade ou vínculo entre registros");
     }
 
-    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErroResponse handleIntegridade(org.springframework.dao.DataIntegrityViolationException e) {
-        return new ErroResponse(409, "Operação viola uma restrição de unicidade ou vínculo entre registros");
+    @ExceptionHandler({ConcurrencyFailureException.class, jakarta.persistence.OptimisticLockException.class,
+            jakarta.persistence.PessimisticLockException.class, jakarta.persistence.LockTimeoutException.class})
+    public ResponseEntity<ErroResponse> concorrencia(RuntimeException e) {
+        return erro(409, "Conflito com outra operação. Atualize os dados e tente novamente");
     }
 
-    @ExceptionHandler(org.springframework.dao.ConcurrencyFailureException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErroResponse handleConcorrencia(org.springframework.dao.ConcurrencyFailureException e) {
-        return new ErroResponse(409, "O registro foi alterado por outra operação. Tente novamente");
-    }
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<ErroResponse> multipart(MultipartException e) { return erro(400, "Envio multipart inválido"); }
 
     @ExceptionHandler(ErroSalvarImagem.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErroResponse handleErroSalvarImagem(ErroSalvarImagem e){
-        return new ErroResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
+    public ResponseEntity<ErroResponse> imagem(ErroSalvarImagem e) {
+        log.error("Falha de armazenamento ou leitura de imagem", e);
+        return erro(500, "Não foi possível processar a imagem");
     }
 
-    @ExceptionHandler(ImagemNãoExiste.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErroResponse handleImagemNaoEncontrada(ImagemNãoExiste e){
-        return new ErroResponse(HttpStatus.NOT_FOUND.value(), e.getMessage());
-    }
-
-    @ExceptionHandler(ProdutoNaoEncontrado.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErroResponse handleProdutoNaoEncontrado(ProdutoNaoEncontrado e){
-        return new ErroResponse(HttpStatus.NOT_FOUND.value(), e.getMessage());
-    }
-
-    @ExceptionHandler(PedidoNaoEncontrado.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErroResponse handlePedidoNaoEncontrado(PedidoNaoEncontrado e){
-        return new ErroResponse(HttpStatus.NOT_FOUND.value(), e.getMessage());
-    }
-
-    @ExceptionHandler(produtoJaCadastrado.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErroResponse handleProdutoJaCadastrado(produtoJaCadastrado e){
-        return new ErroResponse(HttpStatus.CONFLICT.value(), e.getMessage());
-    }
-
-    @ExceptionHandler(CategoriaNaoEncontrada.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErroResponse handleCategoriaNaoEncontrada(CategoriaNaoEncontrada e){
-        return new ErroResponse(HttpStatus.NOT_FOUND.value(), e.getMessage());
-    }
-
-    @ExceptionHandler(CarrinhoNaoEncontrado.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErroResponse handleCarrinhoNaoEncontrado(CarrinhoNaoEncontrado e){
-        return new ErroResponse(HttpStatus.NOT_FOUND.value(), e.getMessage());
-    }
-
-    @ExceptionHandler(CategoiraJaCriada.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErroResponse handleCategoriaJaCriada(CategoiraJaCriada e){
-        return new ErroResponse(HttpStatus.CONFLICT.value(), e.getMessage());
-    }
-
-    @ExceptionHandler(UsuarioNaoEncontrado.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErroResponse handleUsuarioNaoEncontrado(UsuarioNaoEncontrado e){
-        return new ErroResponse(HttpStatus.NOT_FOUND.value(), e.getMessage());
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErroResponse handleValidacao(MethodArgumentNotValidException e){
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException e,
+            HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         String mensagem = e.getBindingResult().getFieldErrors().stream()
-                .map(err -> err.getField() + ": " + err.getDefaultMessage())
-                .reduce((a, b) -> a + "; " + b)
-                .orElse("Dados inválidos");
-        return new ErroResponse(HttpStatus.BAD_REQUEST.value(), mensagem);
+                .map(err -> err.getField() + ": " + err.getDefaultMessage()).sorted()
+                .collect(java.util.stream.Collectors.joining("; "));
+        return new ResponseEntity<>(new ErroResponse(400, mensagem), headers, status);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleExceptionInternal(Exception e, Object body, HttpHeaders headers,
+            HttpStatusCode status, WebRequest request) {
+        String mensagem = switch (status.value()) {
+            case 400 -> "Requisição inválida: verifique o JSON, os parâmetros e os arquivos enviados";
+            case 404 -> "Recurso não encontrado";
+            case 405 -> "Método HTTP não permitido para esta rota";
+            case 413 -> "Envio excede o tamanho máximo permitido";
+            case 415 -> "Tipo de conteúdo não suportado por esta rota";
+            default -> status.is5xxServerError() ? "Erro interno ao processar a requisição" : "Não foi possível atender à requisição";
+        };
+        if (status.is5xxServerError()) log.error("Falha HTTP interna", e);
+        return new ResponseEntity<>(new ErroResponse(status.value(), mensagem), headers, status);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErroResponse> inesperado(Exception e) {
+        log.error("Erro inesperado ao processar requisição", e);
+        return erro(500, "Erro interno ao processar a requisição");
+    }
+
+    private ResponseEntity<ErroResponse> erro(int status, String mensagem) {
+        return ResponseEntity.status(status).body(new ErroResponse(status, mensagem));
     }
 }

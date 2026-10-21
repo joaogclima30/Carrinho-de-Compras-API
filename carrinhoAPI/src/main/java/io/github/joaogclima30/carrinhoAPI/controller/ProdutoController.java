@@ -1,91 +1,49 @@
 package io.github.joaogclima30.carrinhoAPI.controller;
 
 import io.github.joaogclima30.carrinhoAPI.dto.ProdutoDTO.ProdutoRequestDTO;
-import io.github.joaogclima30.carrinhoAPI.model.Categoria;
-import io.github.joaogclima30.carrinhoAPI.model.Produto;
 import io.github.joaogclima30.carrinhoAPI.response.ApiResponse;
 import io.github.joaogclima30.carrinhoAPI.service.Produto.ProdutoService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import io.github.joaogclima30.carrinhoAPI.mapper.DtoMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
-
-@RequiredArgsConstructor
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("${api.prefix}/produtos")
 public class ProdutoController {
-
-    private final ProdutoService produtoService;
+    private final ProdutoService service;
 
     @PostMapping("/salvar")
-    public ResponseEntity<ApiResponse> salvarProduto(@jakarta.validation.Valid @RequestBody ProdutoRequestDTO produtoRequestDTO){
-        Produto produtoSalvo = produtoService.salvarProduto(produtoRequestDTO);
-        return ResponseEntity.ok(new ApiResponse("Produto salvo com sucesso!", DtoMapper.produto(produtoSalvo)));
+    public ResponseEntity<ApiResponse> salvarProduto(@Valid @RequestBody ProdutoRequestDTO dto) {
+        return ok("Produto salvo com sucesso", service.salvarProdutoDto(dto));
     }
-
     @PutMapping("/{produtoId}/atualizar")
-    public ResponseEntity<ApiResponse> atualizarProduto(@jakarta.validation.Valid @RequestBody ProdutoRequestDTO requestDTO, @PathVariable Long produtoId){
-        Produto produto = produtoService.atualizarProduto(requestDTO, produtoId);
-        return ResponseEntity.ok(new ApiResponse("Atualizado com Sucesso!", DtoMapper.produto(produto)));
+    public ResponseEntity<ApiResponse> atualizarProduto(@Valid @RequestBody ProdutoRequestDTO dto, @PathVariable @Positive Long produtoId) {
+        return ok("Produto atualizado", service.atualizarProdutoDto(dto, produtoId));
     }
-
     @DeleteMapping("/{produtoId}/deletar")
-    public ResponseEntity<ApiResponse> deletarProduto(@PathVariable Long produtoId){
-        produtoService.deletarProduto(produtoId);
-        return ResponseEntity.ok(new ApiResponse("Deletado com sucesso", null));
+    public ResponseEntity<ApiResponse> deletarProduto(@PathVariable @Positive Long produtoId) {
+        service.deletarProduto(produtoId);
+        return ok("Produto excluído", null);
     }
-
     @GetMapping("/all")
-    public ResponseEntity<ApiResponse> listarTodosProdutos(){
-        List<Produto> produtos = produtoService.listarTodosProdutos();
-        var produtosConvertidos = produtoService.listarProdutosConvertidos(produtos);
-        return ResponseEntity.ok(new ApiResponse("Sucesso!", produtosConvertidos));
-    }
-
+    public ResponseEntity<ApiResponse> listarTodosProdutos() { return ok("Sucesso", service.listarTodosDto()); }
     @GetMapping("/{produtoId}/listarPorId")
-    public ResponseEntity<ApiResponse> listarProdutoPorId(@PathVariable Long produtoId){
-        Produto produto = produtoService.obterPorId(produtoId);
-        var produtoDto = produtoService.converterParaDto(produto);
-        return ResponseEntity.ok(new ApiResponse("Sucesso!", produtoDto));
-    }
-
+    public ResponseEntity<ApiResponse> listarProdutoPorId(@PathVariable @Positive Long produtoId) { return ok("Sucesso", service.listarPorIdDto(produtoId)); }
     @GetMapping("/by/marca-and-nomeProduto")
-    public ResponseEntity<ApiResponse> listarProdutosByMarcaAndNome(@RequestParam String marca, @RequestParam String nomeProduto){
-        List<Produto> produtos = produtoService.listarProdutoPorMarcaAndNome(marca,nomeProduto);
-        var produtosConvertidos = produtoService.listarProdutosConvertidos(produtos);
-        return ResponseEntity.ok(new ApiResponse("Sucesso", produtosConvertidos));
-    }
-
+    public ResponseEntity<ApiResponse> listarProdutosByMarcaAndNome(@RequestParam String marca, @RequestParam String nomeProduto) { return ok("Sucesso", service.listarPorMarcaENomeDto(marca, nomeProduto)); }
     @GetMapping("/by/categoria-and-marca")
-    public ResponseEntity<ApiResponse> listarProdutosByCategoriaAndMarca(@RequestParam String categoria, @RequestParam String marca){
-        List<Produto> produtos = produtoService.listarProdutoPorCategoriaAndMarca(categoria, marca);
-        return ResponseEntity.ok(new ApiResponse("Sucesso", produtos.stream().map(DtoMapper::produto).toList()));
-    }
-
+    public ResponseEntity<ApiResponse> listarProdutosByCategoriaAndMarca(@RequestParam String categoria, @RequestParam String marca) { return ok("Sucesso", service.listarPorCategoriaEMarcaDto(categoria, marca)); }
     @GetMapping("/{nome}/produtos")
-    public ResponseEntity<ApiResponse> listarProdutosByNome(@PathVariable String nome){
-        List<Produto> produtos = produtoService.listarProdutoPorNome(nome);
-        return ResponseEntity.ok(new ApiResponse("Sucesso", produtos.stream().map(DtoMapper::produto).toList()));
-    }
-
+    public ResponseEntity<ApiResponse> listarProdutosByNome(@PathVariable String nome) { return ok("Sucesso", service.listarPorNomeDto(nome)); }
     @GetMapping("/produto/by-marca")
-    public ResponseEntity<ApiResponse> listarProdutoByMarca(@RequestParam String marca){
-        List<Produto> produtos = produtoService.listarProdutosPorMarca(marca);
-        return ResponseEntity.ok(new ApiResponse("Sucesso", produtos.stream().map(DtoMapper::produto).toList()));
-    }
-
+    public ResponseEntity<ApiResponse> listarProdutoByMarca(@RequestParam String marca) { return ok("Sucesso", service.listarPorMarcaDto(marca)); }
     @GetMapping("/produto/{categoria}/all/produtos")
-    public ResponseEntity<ApiResponse> listarProdutoByCategoria(@PathVariable String categoria){
-        List<Produto> produtos = produtoService.listarProdutosPorCategoria(categoria);
-        return ResponseEntity.ok(new ApiResponse("Sucesso", produtos.stream().map(DtoMapper::produto).toList()));
-    }
-
+    public ResponseEntity<ApiResponse> listarProdutoByCategoria(@PathVariable String categoria) { return ok("Sucesso", service.listarPorCategoriaDto(categoria)); }
     @GetMapping("/produto/contador/by-brand/and-nome")
-    public ResponseEntity<ApiResponse> contadorProdutosByMarcaAndNome(@RequestParam String marca, @RequestParam String nome){
-        var contadorProduto = produtoService.contadorProdutosPorMarcaAndNome(marca, nome);
-        return ResponseEntity.ok(new ApiResponse("Produto contado", contadorProduto));
-    }
+    public ResponseEntity<ApiResponse> contadorProdutosByMarcaAndNome(@RequestParam String marca, @RequestParam String nome) { return ok("Sucesso", service.contadorProdutosPorMarcaAndNome(marca, nome)); }
+
+    private ResponseEntity<ApiResponse> ok(String mensagem, Object data) { return ResponseEntity.ok(new ApiResponse(mensagem, data)); }
 }

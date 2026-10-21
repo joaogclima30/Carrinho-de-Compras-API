@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Configuração local e segredos
+.env
+.env.*
+!.env.example
+src/main/resources/application-local.yaml

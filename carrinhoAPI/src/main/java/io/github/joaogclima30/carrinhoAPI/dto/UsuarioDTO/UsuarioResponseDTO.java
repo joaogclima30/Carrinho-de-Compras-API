@@ -1,7 +1,7 @@
 package io.github.joaogclima30.carrinhoAPI.dto.UsuarioDTO;
 
 import io.github.joaogclima30.carrinhoAPI.dto.CarrinhoDTO.CarrinhoDto;
-import io.github.joaogclima30.carrinhoAPI.dto.PedidoDTO.PedidoRequestDTO;
+import io.github.joaogclima30.carrinhoAPI.dto.PedidoDTO.PedidoResponseDTO;
 import lombok.Data;
 
 import java.util.List;
@@ -13,6 +13,6 @@ public class UsuarioResponseDTO {
     private String primeiroNome;
     private String sobrenome;
     private String email;
-    private List<PedidoRequestDTO> pedidos;
+    private List<PedidoResponseDTO> pedidos;
     private CarrinhoDto carrinho;
 }

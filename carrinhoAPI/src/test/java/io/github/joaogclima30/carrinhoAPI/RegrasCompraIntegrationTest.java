@@ -4,7 +4,7 @@ import io.github.joaogclima30.carrinhoAPI.dto.CategoriaDTO.CategoriaRequestDTO;
 import io.github.joaogclima30.carrinhoAPI.dto.ProdutoDTO.ProdutoRequestDTO;
 import io.github.joaogclima30.carrinhoAPI.dto.UsuarioDTO.UsuarioCriarDTO;
 import io.github.joaogclima30.carrinhoAPI.exceptions.*;
-import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsCategoria.CategoiraJaCriada;
+import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsCategoria.CategoriaJaCriada;
 import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsProdutos.*;
 import io.github.joaogclima30.carrinhoAPI.model.*;
 import io.github.joaogclima30.carrinhoAPI.repository.*;
@@ -162,12 +162,12 @@ class RegrasCompraIntegrationTest {
         Categoria primeira = categorias.saveAndFlush(new Categoria("Primeira-" + UUID.randomUUID()));
         Categoria segunda = categorias.saveAndFlush(new Categoria("Segunda-" + UUID.randomUUID()));
         CategoriaRequestDTO dto = new CategoriaRequestDTO(); dto.setNome(primeira.getNome());
-        assertThrows(CategoiraJaCriada.class, () -> categoriaService.atualizarCategoria(dto, segunda.getId()));
+        assertThrows(CategoriaJaCriada.class, () -> categoriaService.atualizarCategoria(dto, segunda.getId()));
     }
 
     @Test void naoPermiteDuplicarProdutoNaAtualizacao() {
         Produto primeiro = produto(5); Produto segundo = produto(5);
-        assertThrows(produtoJaCadastrado.class, () -> produtoService.atualizarProduto(dto(primeiro.getNome(), primeiro.getMarca(), primeiro.getCategoria().getNome()), segundo.getId()));
+        assertThrows(ProdutoJaCadastradoException.class, () -> produtoService.atualizarProduto(dto(primeiro.getNome(), primeiro.getMarca(), primeiro.getCategoria().getNome()), segundo.getId()));
     }
 
     @Test void permiteAtualizacaoSemMudarChaveDoProduto() {
@@ -186,6 +186,16 @@ class RegrasCompraIntegrationTest {
         UsuarioCriarDTO dto = new UsuarioCriarDTO();
         dto.setPrimeiroNome("Nome"); dto.setSobrenome("Sobrenome"); dto.setEmail(carrinho.getUsuario().getEmail()); dto.setSenha("senha-teste");
         assertThrows(ConflitoException.class, () -> usuarioService.criarUsuario(dto));
+    }
+
+    @Test void getUserByIdRetornaUsuarioEncontrado() {
+        Usuario usuario = carrinho().getUsuario();
+        assertEquals(usuario.getId(), usuarioService.getUserById(usuario.getId()).getId());
+    }
+
+    @Test void getUserByIdRejeitaUsuarioInexistente() {
+        assertThrows(io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsUsuario.UsuarioNaoEncontrado.class,
+                () -> usuarioService.getUserById(Long.MAX_VALUE));
     }
 
     @Test void bancoImpedeEmailDuplicadoMesmoSemService() {

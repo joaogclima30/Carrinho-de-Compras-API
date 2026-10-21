@@ -1,8 +1,8 @@
 package io.github.joaogclima30.carrinhoAPI.service.Pedido;
 
-import io.github.joaogclima30.carrinhoAPI.dto.PedidoDTO.PedidoRequestDTO;
+import io.github.joaogclima30.carrinhoAPI.dto.PedidoDTO.PedidoResponseDTO;
 import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsCarrinho.CarrinhoNaoEncontrado;
-import io.github.joaogclima30.carrinhoAPI.exceptions.ExpectionsPedidos.PedidoNaoEncontrado;
+import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsPedidos.PedidoNaoEncontrado;
 import io.github.joaogclima30.carrinhoAPI.model.Carrinho;
 import io.github.joaogclima30.carrinhoAPI.model.Enum.PedidoStatus;
 import io.github.joaogclima30.carrinhoAPI.model.Pedido;
@@ -36,6 +36,7 @@ public class PedidoService {
     private final ProdutoRepository produtoRepository;
     private final CarrinhoRepository carrinhoRepository;
     private final CarrinhoService carrinhoService;
+    private final DtoMapper mapper;
     private final jakarta.persistence.EntityManager entityManager;
 
 
@@ -57,6 +58,11 @@ public class PedidoService {
         carrinhoService.limparCarrinho(carrinhoEncontrado.getId());
 
         return pedidoSalvo;
+    }
+
+    @Transactional
+    public PedidoResponseDTO fazerPedidoDto(Long usuarioId) {
+        return mapper.pedido(fazerPedido(usuarioId));
     }
 
     public Pedido criarPedido(Carrinho carrinho){
@@ -107,19 +113,19 @@ public class PedidoService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public PedidoRequestDTO listarPedido(Long pedidoId){
+    public PedidoResponseDTO listarPedido(Long pedidoId){
         return pedidoRepository.findById(pedidoId)
                 .map(this::converterToDTO)
                 .orElseThrow(() -> new PedidoNaoEncontrado("Pedido não Encontrado"));
     }
 
-    public List<PedidoRequestDTO> listarPedidosPorUsuario(Long usuarioId){
+    public List<PedidoResponseDTO> listarPedidosPorUsuario(Long usuarioId){
         List<Pedido> pedidos = pedidoRepository.findByUsuarioId(usuarioId);
         return pedidos.stream().map(this ::converterToDTO).toList();
     }
 
-    public PedidoRequestDTO converterToDTO(Pedido pedido){
-        return DtoMapper.pedido(pedido);
+    public PedidoResponseDTO converterToDTO(Pedido pedido){
+        return mapper.pedido(pedido);
     }
 
 }

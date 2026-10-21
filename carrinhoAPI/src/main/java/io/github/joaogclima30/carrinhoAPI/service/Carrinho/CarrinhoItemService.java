@@ -17,6 +17,23 @@ import org.springframework.stereotype.Service;
 public class CarrinhoItemService {
     private final CarrinhoRepository carrinhoRepository;
     private final ProdutoService produtoService;
+    private final CarrinhoService carrinhoService;
+    private final io.github.joaogclima30.carrinhoAPI.mapper.DtoMapper mapper;
+    private final jakarta.persistence.EntityManager entityManager;
+
+    public io.github.joaogclima30.carrinhoAPI.dto.CarrinhoDTO.CarrinhoDto adicionarItem(
+            Long usuarioId, Long carrinhoId, Long produtoId, int quantidade) {
+        validarQuantidade(quantidade);
+        Carrinho carrinho = carrinhoService.prepararCarrinho(usuarioId, carrinhoId);
+        salvarItem(carrinho.getId(), produtoId, quantidade);
+        entityManager.flush();
+        return mapper.carrinho(carrinho);
+    }
+
+    @Transactional(readOnly = true)
+    public io.github.joaogclima30.carrinhoAPI.dto.CarrinhoDTO.CarrinhoItemDto listarItemDto(Long carrinhoId, Long produtoId) {
+        return mapper.item(listarCarrinhoItem(carrinhoId, produtoId));
+    }
 
     public void salvarItem(Long carrinhoId, Long produtoId, int quantidade) {
         validarQuantidade(quantidade);
