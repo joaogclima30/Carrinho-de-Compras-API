@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-import javax.management.relation.Role;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -54,8 +53,8 @@ public class Usuario {
 
         @ManyToMany(fetch = FetchType.EAGER, cascade =
                 {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-        @JoinTable(name = "user_roles",  joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
+        @JoinTable(name = "usuario_roles",  joinColumns = @JoinColumn(name = "usuario_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id")
         )
     private Collection<Role> roles = new HashSet<>();
 }
