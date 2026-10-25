@@ -92,6 +92,21 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return erro(500, "Erro interno ao processar a requisição");
     }
 
+    @ExceptionHandler({org.springframework.security.authentication.BadCredentialsException.class,
+            org.springframework.security.core.userdetails.UsernameNotFoundException.class})
+    public ResponseEntity<java.util.Map<String, String>> credenciaisInvalidas() {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(java.util.Map.of(
+                "error", "Unauthorized",
+                "message", "Email ou senha inválidos"));
+    }
+
+    // As demais falhas de segurança seguem para o entry point (401) ou acesso negado (403).
+    @ExceptionHandler({org.springframework.security.core.AuthenticationException.class,
+            org.springframework.security.access.AccessDeniedException.class})
+    public void seguranca(RuntimeException e) {
+        throw e;
+    }
+
     private ResponseEntity<ErroResponse> erro(int status, String mensagem) {
         return ResponseEntity.status(status).body(new ErroResponse(status, mensagem));
     }

@@ -1,16 +1,16 @@
 package io.github.joaogclima30.carrinhoAPI.security.user;
 
-import io.github.joaogclima30.carrinhoAPI.exceptions.ExceptionsUsuario.UsuarioNaoEncontrado;
 import io.github.joaogclima30.carrinhoAPI.model.Usuario;
 import io.github.joaogclima30.carrinhoAPI.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 
 @RequiredArgsConstructor
+@Service
 public class UsuarioLojaDtoService implements UserDetailsService {
     private final UsuarioRepository usuarioRepository;
 
@@ -18,9 +18,10 @@ public class UsuarioLojaDtoService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
 
-        Usuario usuario = usuarioRepository.findByEmail(username)
-                .orElseThrow(() ->
-                        new UsernameNotFoundException("Usuário não encontrado"));
+        Usuario usuario = usuarioRepository.findByEmail(username);
+        if (usuario == null) {
+            throw new UsernameNotFoundException("Usuário não encontrado");
+        }
 
         return UsuarioLojaDto.buildUserDetails(usuario);
     }

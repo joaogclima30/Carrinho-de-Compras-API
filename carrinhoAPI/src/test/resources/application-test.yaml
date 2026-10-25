@@ -1,4 +1,9 @@
 spring:
+  test:
+    database:
+      replace: none
+  config:
+    import: ""
   datasource:
     url: ${TEST_DATABASE_URL:jdbc:h2:mem:carrinho-tests;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=10000}
     username: ${TEST_DATABASE_USERNAME:sa}
@@ -9,3 +14,10 @@ spring:
     show-sql: false
     hibernate:
       ddl-auto: create-drop
+app:
+  seed:
+    enabled: false
+auth:
+  token:
+    jwtSecret: MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=
+    expirationInMils: 3600000

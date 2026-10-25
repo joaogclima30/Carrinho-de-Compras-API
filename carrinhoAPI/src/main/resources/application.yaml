@@ -26,3 +26,7 @@ app:
     max-pixels: ${UPLOAD_MAX_PIXELS:20000000}
   seed:
     enabled: false
+auth:
+  token:
+    expirationInMils: 3600000
+    jwtSecret: xcMs5RTMRNE43A9u71XU3fzFY+XVG1AGxbbfRPoab60

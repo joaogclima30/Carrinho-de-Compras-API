@@ -43,12 +43,28 @@ class FluxosHttpIntegrationTest {
     @Autowired WebApplicationContext context;
     @Autowired ObjectMapper json;
     @Autowired EntityManager em;
+    @Autowired RoleRepository roles;
+    @Autowired io.github.joaogclima30.carrinhoAPI.security.jwt.JwtUtils jwtUtils;
+    @Autowired org.springframework.security.crypto.password.PasswordEncoder encoder;
     MockMvc mvc;
     TransactionTemplate tx;
 
     @BeforeEach void preparar() {
-        mvc = MockMvcBuilders.webAppContextSetup(context).build();
         tx = new TransactionTemplate(transactionManager);
+        String token = tx.execute(status -> {
+            Role role = roles.findByNome("ROLE_ADMIN").orElseGet(() -> roles.save(new Role("ROLE_ADMIN")));
+            Usuario admin = new Usuario("Admin", "Teste", UUID.randomUUID() + "@example.com", encoder.encode("senha-teste"));
+            admin.getRoles().add(role);
+            usuarios.saveAndFlush(admin);
+            var principal = io.github.joaogclima30.carrinhoAPI.security.user.UsuarioLojaDto.buildUserDetails(admin);
+            return jwtUtils.generateTokenForUser(new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                    principal, null, principal.getAuthorities()));
+        });
+        // Este grupo testa contratos funcionais com um administrador autenticado.
+        // A auditoria de propriedade e acesso anônimo fica em AuditoriaSecurityIntegrationTest.
+        mvc = MockMvcBuilders.webAppContextSetup(context)
+                .addFilters(context.getBean("springSecurityFilterChain", jakarta.servlet.Filter.class))
+                .defaultRequest(get("/").header("Authorization", "Bearer " + token)).build();
     }
 
     record Dados(Long usuarioId, Long produtoId, Long categoriaId, String nome, String categoria) {}
@@ -196,7 +212,7 @@ class FluxosHttpIntegrationTest {
                 .andExpect(jsonPath("$.data.senha").doesNotExist());
         mvc.perform(post("/api/v1/usuarios").contentType("application/json").content(body))
                 .andExpect(status().isConflict());
-        assertTrue(usuarios.findByEmail(email).isPresent());
+        assertNotNull(usuarios.findByEmail(email));
     }
 
     @Test void buscaReconheceEmailLegadoComEspacosEMaiusculas() {
@@ -204,7 +220,7 @@ class FluxosHttpIntegrationTest {
         tx.executeWithoutResult(status -> em.createNativeQuery("update usuario set email = :email where id = :id")
                 .setParameter("email", "  " + email + "  ").setParameter("id", dados.usuarioId()).executeUpdate());
         assertTrue(usuarios.existsByEmail(email.toLowerCase(Locale.ROOT)));
-        assertEquals(dados.usuarioId(), usuarios.findByEmail(email).orElseThrow().getId());
+        assertEquals(dados.usuarioId(), usuarios.findByEmail(email).getId());
     }
 
     @ParameterizedTest @ValueSource(strings = {"primeiroNome", "sobrenome", "senha"})

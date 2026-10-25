@@ -5,4 +5,4 @@ spring:
     show-sql: ${SHOW_SQL:false}
 app:
   seed:
-    enabled: ${DEV_SEED_ENABLED:false}
+    enabled: ${DEV_SEED_ENABLED:true}

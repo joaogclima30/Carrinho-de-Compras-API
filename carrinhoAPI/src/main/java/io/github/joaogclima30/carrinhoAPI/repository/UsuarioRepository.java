@@ -11,7 +11,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     boolean existsByEmail(@Param("email") String email);
 
     @Query("select u from Usuario u where lower(trim(u.email)) = lower(trim(:email))")
-    Optional<Usuario> findByEmail(@Param("email") String email);
+    Usuario findByEmail(@Param("email") String email);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select u from Usuario u where u.id = :id")
