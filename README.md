@@ -4,8 +4,6 @@ API REST de um sistema de carrinho de compras, desenvolvida com **Java 21 e Spri
 
 O projeto permite gerenciar produtos e categorias, adicionar itens a carrinhos, gerar pedidos com baixa de estoque e armazenar imagens de produtos.
 
-> **Estado atual:** projeto de estudo em evolução. O login com JWT e as permissões de administrador para produtos estão implementados. A autorização das demais operações e a proteção dos recursos de cada usuário ainda têm pendências identificadas por testes. A API ainda não está pronta para exposição pública.
-
 ## Tecnologias
 
 | Tecnologia | Uso no projeto |
